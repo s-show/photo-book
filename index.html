@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>写真帳作成ページ</title>
+  <style>
+    #header {
+      display: none;
+    }
+    #headerText {
+      display: block;
+      height: 1.5em;
+      width: 25%;
+    }
+    #fileSelectorLabel, #headerTextLabel {
+      display: block;
+      margin-top: 1em;
+    }
+    .imageDiv {
+      display: flex;
+      margin-top: 10mm;
+      border: solid 1px gray;
+      background-color: lightcyan;
+      cursor: grab;
+    }
+    .thumb {
+      border: solid 1px gray;
+      width: 360px;
+      height: auto;
+    }
+    .imageCaption {
+      vertical-align: top;
+      margin-left: 1em;
+      margin-right: 10em;
+      background-color: whitesmoke;
+    }
+    @media print {  
+      body {
+        width: 210mm;
+      }
+      #header {
+        display: block;
+        font-size: x-large;
+        text-align: center;
+        position: fixed;
+        top: 10mm;
+        width: 100%;
+        margin-bottom: 5mm;
+      }
+      #fileSelector, #fileSelectorLabel,
+      #headerText, #headerTextLabel,
+      .informationP, .landmarkP
+      {
+        display: none;
+      }
+      .imageDiv {
+        padding-top: 20mm;
+        padding-left: 25mm;
+        padding-right: 20mm;
+        break-inside: avoid;
+        margin: 0;
+        border: none;
+        background-color: white;
+      }
+      .thumb {
+        width: 480px;
+        height: auto;
+      }
+      .imageCaption {
+        padding-right: 10mm;
+        background-color: white;
+        margin-right: 0;
+      }
+      @page {
+        size: A4;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main">
+    <div class="header" id="header"></div>
+    <div id="informationDiv">
+      <div>
+        <label class="fileSelectorLabel" id="fileSelectorLabel" for="folderSelector">表示する画像を選択してください</label>
+        <input type="file" id="fileSelector" accept="image/*" multiple />
+      </div>
+      <div>
+        <label class="headerText" id="headerTextLabel" for="headerText">ヘッダーとして表示する文言を入力してください</label>
+        <input type="text" size="40" id="headerText">
+      </div>
+      <p class="informationP">印刷されるのは画像とファイル名だけです</p>
+      <p class="informationP">画像は水色で塗りつぶした箇所をドラッグして並び替えができます</p>
+      <span class="informationP">全</span>
+      <span id="imageCount" class="informationP"></span>
+      <span class="informationP">ファイル中</span>
+      <span id="imageIndex" class="informationP"></span>
+      <span class="informationP">ファイルの読み込み完了</span>
+    </div>
+    <div id="imageList"></div>  
+  </div>
+</body>
+<script>
+  document.getElementById("fileSelector").addEventListener("change", ev => {
+    // 再読み込みに備えて読み込み済みの画像をクリアする
+    let divImageList = document.getElementById('imageList');
+    while (divImageList.firstChild) {
+      divImageList.removeChild(divImageList.firstChild);
+    }
+
+    // 読み込むファイルの拡張子を指定
+    const fileTypes = ['jpg', 'jpeg', 'png', 'bmp', 'gif'];
+
+    document.getElementById('imageCount').innerText = ev.target.files.length;
+    let imageIndex = 0;
+
+    Array.from(ev.target.files).forEach((file) => {
+      let extension = file.name.split('.').pop().toLowerCase();
+      let isImageFile = fileTypes.indexOf(extension) > -1;
+      if (!isImageFile) {
+        return;
+      }
+
+      let fileReader = new FileReader();
+      fileReader.readAsDataURL(file); 
+
+      fileReader.addEventListener('loadstart', (() => {
+        console.log('loading: ' + file.name);
+      })(file));
+
+      fileReader.addEventListener('load', (() => {
+        return (e) => {
+          let imageDiv = document.createElement("div");
+          imageDiv.className = "imageDiv";
+          imageDiv.setAttribute('id', file.name);
+          imageDiv.setAttribute('draggable', true);
+
+          let image = document.createElement("img");
+          image.className = "thumb"
+          //base64エンコードされた文字列をイメージソースに設定している
+          image.src = e.target.result
+
+          let imageCaption = document.createElement("span");
+          imageCaption.innerText = file.name.split('.')[0];
+          imageCaption.className = "imageCaption";
+
+          imageDiv.insertBefore(image, null);
+          imageDiv.insertBefore(imageCaption, null);
+          document.getElementById("imageList").insertBefore(imageDiv, null);
+          console.log('loaded: ' + file.name)
+          imageIndex = imageIndex + 1;
+          document.getElementById('imageIndex').innerText = imageIndex;
+        };
+      })(file));
+    })
+  });
+
+  // ドラッグで順番を入れ替える処理
+  const elm = document.getElementById('imageList');
+  elm.addEventListener('dragstart', function(event) {
+    if (event.target.classList.contains('imageDiv')) {
+      // console.info('dragstart start.');
+      event.dataTransfer.setData('text/plain', event.target.id);
+    }
+  });
+  elm.addEventListener('dragover', function(event) {
+    let underImage = document.getElementById(event.target.id);
+    if (event.target.classList.contains('imageDiv')) {
+      event.preventDefault();
+      let rect = underImage.getBoundingClientRect();
+      if ((event.clientY - rect.top) < (underImage.clientHeight /2)) {
+        console.info(rect.top);
+        //マウスカーソルの位置が要素の半分より上
+        underImage.style.borderTop = '20px solid blue';
+  			underImage.style.borderBottom = '';
+      } else {
+        //マウスカーソルの位置が要素の半分より下
+        underImage.style.borderTop = '';
+  			underImage.style.borderBottom = '20px solid blue';
+      }
+    }
+  })
+  elm.addEventListener('dragleave', function(event) {
+    let underImage = document.getElementById(event.target.id);
+    if (event.target.classList.contains('imageDiv')) {
+      underImage.style.borderTop = '';
+			underImage.style.borderBottom = '';
+    }
+  })
+  elm.addEventListener('drop', function(event) {
+    let underImage = document.getElementById(event.target.id);
+    if (event.target.classList.contains('imageDiv')) {
+      event.preventDefault();
+  		let id = event.dataTransfer.getData('text/plain');
+	  	let elm_drag = document.getElementById(id);
+
+		  let rect = underImage.getBoundingClientRect();
+  		if ((event.clientY - rect.top) < (underImage.clientHeight / 2)) {
+  			//マウスカーソルの位置が要素の半分より上
+  			underImage.parentNode.insertBefore(elm_drag, underImage);
+  		} else {
+  			//マウスカーソルの位置が要素の半分より下
+  			underImage.parentNode.insertBefore(elm_drag, underImage.nextSibling);
+  		}
+  		underImage.style.borderTop = '';
+  		underImage.style.borderBottom = '';
+    }
+	});
+
+  // ヘッダーとして表示する文字列の設定
+  document.getElementById('headerText').addEventListener('change', () => {
+    document.getElementById('header').innerText = event.target.value;
+  })
+</script>
+</html>
