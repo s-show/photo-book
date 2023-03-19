@@ -94,6 +94,7 @@
       </div>
       <p class="informationP">印刷されるのは画像とファイル名だけです</p>
       <p class="informationP">画像は水色で塗りつぶした箇所をドラッグして並び替えができます</p>
+      <p class="informationP">ファイル名をダブルクリックすると変更できます</p>
       <span class="informationP">全</span>
       <span id="imageCount" class="informationP"></span>
       <span class="informationP">ファイル中</span>
@@ -135,7 +136,7 @@
         return (e) => {
           let imageDiv = document.createElement("div");
           imageDiv.className = "imageDiv";
-          imageDiv.setAttribute('id', file.name);
+          imageDiv.setAttribute('id', file.name + 'Div');
           imageDiv.setAttribute('draggable', true);
 
           let image = document.createElement("img");
@@ -146,6 +147,7 @@
           let imageCaption = document.createElement("span");
           imageCaption.innerText = file.name.split('.')[0];
           imageCaption.className = "imageCaption";
+          imageCaption.setAttribute('id', file.name + 'Span')
 
           imageDiv.insertBefore(image, null);
           imageDiv.insertBefore(imageCaption, null);
@@ -209,6 +211,13 @@
   		underImage.style.borderBottom = '';
     }
 	});
+  // 写真の横に表示しているファイル名を変更する処理
+  elm.addEventListener('dblclick', (event) => {
+    if (event.target.classList.contains('imageCaption')) {
+      let result = prompt('変更後のファイル名を入力してください');
+			document.getElementById(event.target.id).innerText = result;
+    }
+  })
 
   // ヘッダーとして表示する文字列の設定
   document.getElementById('headerText').addEventListener('change', () => {
