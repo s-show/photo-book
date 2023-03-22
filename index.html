@@ -5,18 +5,43 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>写真帳作成ページ</title>
-  <style>
+  <style id="css">
+    p {
+      margin-top: 0.75em;
+      margin-bottom: 0.2em;
+      line-height: 1em;
+      font-size: 1em;
+    }
+    label {
+      margin-top: 0.75em;
+      margin-bottom: 0.2em;
+      line-height: 1em;
+    }
+    input {
+      margin-top: 0.75em;
+      margin-bottom: 0.2em;
+      font-size: 1em;
+    }
+    ul {
+      margin-top: 0.75em;
+      margin-bottom: 0.2em;
+      font-size: 1em;
+    }
     #header {
       display: none;
+      font-size: 1.5em;
     }
     #headerText {
-      display: block;
       height: 1.5em;
       width: 25%;
     }
-    #fileSelectorLabel, #headerTextLabel {
-      display: block;
+    #imageWidth {
+      height: 1.5em;
+      width: 10%;
+    }
+    #progressCount {
       margin-top: 1em;
+      margin-bottom: 0.2em;
     }
     .imageDiv {
       display: flex;
@@ -27,7 +52,7 @@
     }
     .thumb {
       border: solid 1px gray;
-      width: 360px;
+      width: 480px;
       height: auto;
     }
     .imageCaption {
@@ -49,9 +74,8 @@
         width: 100%;
         margin-bottom: 5mm;
       }
-      #fileSelector, #fileSelectorLabel,
-      #headerText, #headerTextLabel,
-      .informationP, .landmarkP
+      li,
+      #informationDiv
       {
         display: none;
       }
@@ -90,29 +114,33 @@
       </div>
       <div>
         <label class="headerText" id="headerTextLabel" for="headerText">ヘッダーとして表示する文言を入力してください</label>
-        <input type="text" size="40" id="headerText">
+        <input type="text" id="headerText">
       </div>
-      <p class="informationP">印刷されるのは画像とファイル名だけです</p>
-      <p class="informationP">画像は水色で塗りつぶした箇所をドラッグして並び替えができます</p>
-      <p class="informationP">ファイル名をダブルクリックすると変更できます</p>
-      <span class="informationP">対象ファイル数: </span>
-      <span id="imageCount" class="informationP">0</span>
-      <span class="informationP">, </span>
-      <span class="informationP">読み込み成功: </span>
-      <span id="readSuccessCount" class="informationP">0</span>
-      <span class="informationP">, </span>
-      <span class="informationP">読み込み失敗: </span>
-      <span id="readErrorCount" class="informationP">0</span>
-      <span class="informationP">, </span>
-      <span class="informationP">画像以外のファイル: </span>
-      <span id="readNotImageCount" class="informationP">0</span>
+      <ul>
+        <li>印刷されるのは画像とファイル名だけです</li>
+        <li>画像は水色で塗りつぶした箇所をドラッグして並び替えができます</li>
+        <li>ファイル名をダブルクリックすると変更できます</li>
+      </ul>
+      <label id="imageWidthLabel" for="imageWidth">次の数値を変えると縦横比を保ったまま画像のサイズを変更できます。</label>
+      <input type="number" id="imageWidth" min="100" step="10" value="480">
+      <div id="progressCount">
+        <span>対象ファイル数: </span>
+        <span id="imageCount">0</span>
+        <span>, 読み込み成功: </span>
+        <span id="readSuccessCount">0</span>
+        <span>, 読み込み失敗: </span>
+        <span id="readErrorCount">0</span>
+        <span>, 画像以外のファイル: </span>
+        <span id="readNotImageCount">0</span>
+      </div>
     </div>
-    <p id="progressP"></p>
-    <div id="imageList"></div>  
   </div>
 </body>
 <script>
   document.getElementById("fileSelector").addEventListener("change", ev => {
+    if (ev.target.files.length == 0) {
+        return;
+    }
     let readErrorCount = 0;
     let readSuccessCount = 0;
     let readNotImageCount = 0;
@@ -252,8 +280,17 @@
   })
 
   // ヘッダーとして表示する文字列の設定
-  document.getElementById('headerText').addEventListener('change', () => {
+  document.getElementById('headerText').addEventListener('input', () => {
     document.getElementById('header').innerText = event.target.value;
+  })
+
+  // 画像の幅を動的に変更する設定
+  document.getElementById('imageWidth').addEventListener('input', (e) => {
+    const styleSheetArray = Array.from(document.getElementById('css').sheet.cssRules);
+    const thumbStyleIndex = styleSheetArray.findIndex((styleSheet) => styleSheet.selectorText=='.thumb');
+    let thumbStyle = document.getElementById('css').sheet.cssRules[thumbStyleIndex];
+    console.log(thumbStyle.style.getPropertyValue('width'));
+    thumbStyle.style.setProperty('width', e.target.value + 'px');
   })
 
   // 読み込んだファイルが画像ファイルならファイルタイプを返し、
