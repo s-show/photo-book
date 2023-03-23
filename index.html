@@ -61,6 +61,41 @@
       margin-right: 10em;
       background-color: whitesmoke;
     }
+    .loadingWrapper {
+      width: 100vw;
+      height: 100vh;
+      background-color: white;
+      opacity: 0.25;
+      position: fixed;
+      top: 8px;
+      left: 8px;
+    }
+    .loading {
+      margin: auto;
+      border: 20px solid gold;
+      border-radius: 50%;
+      border-top: 20px solid dodgerblue;
+      width: 1vw;
+      height: 1vw;
+      animation: spinner 4s linear infinite;
+      position: absolute;
+      top: calc(50% - 300px);
+      left: calc(50% - 26px);
+      background-color: white;
+      opacity: 1.0;
+      z-index: 999;
+    }
+    .loadingMessage {
+      display: none;
+      position: absolute;
+      top: calc(50% - 240px);
+      left: calc(50% - 48px);
+      text-align: center;
+    }
+    @keyframes spinner {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
     @media print {  
       body {
         width: 210mm;
@@ -105,8 +140,10 @@
   </style>
 </head>
 <body>
-  <div class="main">
-    <div class="header" id="header"></div>
+  <div class="header" id="header"></div>
+  <div id="loading"></div>
+  <div id="loadingMessage" class="loadingMessage">読み込み中...</div>
+  <div id="content" class="main">
     <div id="informationDiv">
       <div>
         <label class="fileSelectorLabel" id="fileSelectorLabel" for="folderSelector">表示する画像を選択してください</label>
@@ -134,6 +171,7 @@
         <span id="readNotImageCount">0</span>
       </div>
     </div>
+    <div id="imageList"></div>
   </div>
 </body>
 <script>
@@ -163,8 +201,8 @@
     readErrorCountSpan.innerText = 0;
     readNotImageCountSpan.innerText = 0;
 
+    toggleLoadingAnimation(true);
     imageCountSpan.innerText = ev.target.files.length;
-    document.getElementById('progressP').innerText = '読み込み中';
 
     Array.from(ev.target.files).forEach((file) => {
       // まず拡張子で画像ファイルか判断し、読み込み後にマジックナンバーを確認して
@@ -197,7 +235,8 @@
           // console.warn(file.name + ' is ' + getImageFormat(e.target.result));
           if (!getImageFormat(e.target.result)) {
             ++readNotImageCount;
-            console.log('not image file: ' + readNotImageCount);
+            console.warn(file.name + ' is not image file.');
+            console.warn('not image file: ' + readNotImageCount);
             readNotImageCountSpan.innerText = readNotImageCount;
           } else {
             let imageFile = {name: '', image: ''};
@@ -213,6 +252,7 @@
           console.info('read file count: ' + readFileCount);
           if (readFileCount == ev.target.files.length) {
             imageListDom(imageFiles);
+            toggleLoadingAnimation(false);
           }
         }
       })(file));
@@ -284,15 +324,38 @@
     document.getElementById('header').innerText = event.target.value;
   })
 
-  // 画像の幅を動的に変更する設定
+  // 画像の幅を動的に変更する設定（表示と印刷両方を同時に変更）
   document.getElementById('imageWidth').addEventListener('input', (e) => {
-    const styleSheetArray = Array.from(document.getElementById('css').sheet.cssRules);
-    const thumbStyleIndex = styleSheetArray.findIndex((styleSheet) => styleSheet.selectorText=='.thumb');
-    let thumbStyle = document.getElementById('css').sheet.cssRules[thumbStyleIndex];
-    console.log(thumbStyle.style.getPropertyValue('width'));
+    const cssStyle = document.getElementById('css').sheet.cssRules;
+    const styleSheetArray = Array.from(cssStyle);
+
+    const thumbStyleIndex = styleSheetArray.findIndex((styleSheet) => styleSheet.selectorText == '.thumb');
+    let thumbStyle = cssStyle[thumbStyleIndex];
     thumbStyle.style.setProperty('width', e.target.value + 'px');
+
+    const mediaQueryIndex = styleSheetArray.findIndex((styleSheet) => styleSheet.media != null);
+    const mediaStyleArray = Array.from(cssStyle[mediaQueryIndex].cssRules);
+    const printThumbStyleIndex = mediaStyleArray.findIndex((mediaStyle) => mediaStyle.selectorText == '.thumb');
+    let printThumbStyle = cssStyle[mediaQueryIndex].cssRules[printThumbStyleIndex];
+    printThumbStyle.style.setProperty('width', e.target.value + 'px');
   })
 
+  // ファイル読み込み中のローディング表示切り替え関数
+  function toggleLoadingAnimation(signal) {
+    let loadingMessageDiv = document.getElementById('loadingMessage');
+    let loadingWrapperDiv = document.getElementById('content');
+    let loadingDiv = document.getElementById('loading');
+    if (signal) {
+      loadingWrapperDiv.classList.add('loadingWrapper');
+      loadingDiv.classList.add('loading');
+      loadingMessageDiv.style.display = 'block';
+    } else {
+      loadingWrapperDiv.classList.remove('loadingWrapper');
+      loadingDiv.classList.remove('loading');
+      loadingMessageDiv.style.display = 'none';
+    }
+  }
+  
   // 読み込んだファイルが画像ファイルならファイルタイプを返し、
   // 画像ファイル以外なら false を返す関数
   // https://qiita.com/hal9188/items/a1378f5b101e991609a8
@@ -350,7 +413,6 @@
       imageDiv.insertBefore(imageCaption, null);
       document.getElementById("imageList").insertBefore(imageDiv, null);
     })
-    document.getElementById('progressP').innerText = ''
   }
 
   // arrayBuffer 型の画像データを DataURL に変換する
