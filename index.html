@@ -9,39 +9,93 @@
     p {
       margin-top: 0.75em;
       margin-bottom: 0.2em;
-      line-height: 1em;
-      font-size: 1em;
+      /* line-height: 1em; */
+      /* font-size: 1em; */
     }
     label {
       margin-top: 0.75em;
       margin-bottom: 0.2em;
-      line-height: 1em;
     }
     input {
       margin-top: 0.75em;
       margin-bottom: 0.2em;
-      font-size: 1em;
     }
     ul {
       margin-top: 0.75em;
       margin-bottom: 0.2em;
-      font-size: 1em;
+    }
+    hr {
+      margin-top: 1em;
     }
     #header {
       display: none;
       font-size: 1.5em;
     }
+    #headerTextLabel, #imageWidthLabel {
+      display: block;
+      margin-bottom: 0.1em;
+    }
     #headerText {
       height: 1.5em;
       width: 25%;
+      margin-top: 0.1em;
+      font-size: 1em;
+    }
+    #addFileBtn {
+      padding-left: 1em;
+      padding-right: 1em;
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      border: 0;
+      border-radius: 5px;
+      background: #0d6efd;
+      color: white;
+      font-weight: 600;
+    }
+    #addFileBtn:hover {
+      background: #6ea8fe;
+      cursor: pointer;
+      outline-offset: 0.2em;
+    }
+    #addFileBtn:focus {
+      background: #6ea8fe;
+      outline-offset: 0.2em;
+    }
+    #fileSelector {
+      display: none;
     }
     #imageWidth {
       height: 1.5em;
       width: 10%;
+      margin-top: 0.1em;
+      font-size: 1em;
     }
     #progressCount {
       margin-top: 1em;
       margin-bottom: 0.2em;
+    }
+    #imageList {
+      margin-top: 1em;
+    }
+    #deleteFileBtn {
+      padding-left: 1em;
+      padding-right: 1em;
+      padding-top: 0.5em;
+      padding-bottom: 0.5em;
+      border: 0;
+      border-radius: 5px;
+      background: #ffc107;
+      color: black;
+      font-weight: 600;
+    }
+    #deleteFileBtn:hover {
+      background: #ffda6a;
+      cursor: pointer;
+      outline-offset: 0.2em;
+    }
+    #deleteFileBtn:focus {
+      background: #ffda6a;
+      outline-offset: 0.2em;
     }
     .imageDiv {
       display: flex;
@@ -146,35 +200,41 @@
   <div id="content" class="main">
     <div id="informationDiv">
       <div>
-        <label class="fileSelectorLabel" id="fileSelectorLabel" for="folderSelector">表示する画像を選択してください</label>
+        <button id="addFileBtn">画像ファイルを追加</button>
         <input type="file" id="fileSelector" accept="image/*" multiple />
       </div>
       <div>
-        <label class="headerText" id="headerTextLabel" for="headerText">ヘッダーとして表示する文言を入力してください</label>
+        <label class="headerText" id="headerTextLabel" for="headerText">ヘッダーの文言を指定できます</label>
         <input type="text" id="headerText">
       </div>
       <ul>
         <li>印刷されるのは画像とファイル名だけです</li>
-        <li>画像は水色で塗りつぶした箇所をドラッグして並び替えができます</li>
+        <li>画像は水色の箇所をドラッグして並び替えできます</li>
         <li>ファイル名をダブルクリックすると変更できます</li>
+        <li>画像をダブルクリックすると削除できます</li>
       </ul>
-      <label id="imageWidthLabel" for="imageWidth">次の数値を変えると縦横比を保ったまま画像のサイズを変更できます。</label>
+      <label id="imageWidthLabel" for="imageWidth">画像サイズを指定できます（縦横比は維持されます）</label>
       <input type="number" id="imageWidth" min="100" step="10" value="480">
       <div id="progressCount">
         <span>対象ファイル数: </span>
         <span id="imageCount">0</span>
-        <span>, 読み込み成功: </span>
+        <span>, 成功: </span>
         <span id="readSuccessCount">0</span>
-        <span>, 読み込み失敗: </span>
+        <span>, 失敗: </span>
         <span id="readErrorCount">0</span>
-        <span>, 画像以外のファイル: </span>
+        <span>, 画像以外: </span>
         <span id="readNotImageCount">0</span>
       </div>
+      <button id="deleteFileBtn">画像を全て削除</button>
     </div>
+    <hr>
     <div id="imageList"></div>
   </div>
 </body>
 <script>
+  document.getElementById('addFileBtn').addEventListener("click", (e) => {
+    document.getElementById('fileSelector').click();
+  });
   document.getElementById("fileSelector").addEventListener("change", ev => {
     if (ev.target.files.length == 0) {
         return;
@@ -191,11 +251,6 @@
     // 読み込むファイルの拡張子を指定
     const fileTypes = ['jpg', 'jpeg', 'png', 'bmp', 'gif'];
 
-    // 再読み込みのために読み込んだ画像を消去してカウンターを初期化する
-    let divImageList = document.getElementById('imageList');
-    while (divImageList.firstChild) {
-      divImageList.removeChild(divImageList.firstChild);
-    }
     imageCountSpan.innerText = 0;
     readSuccessCountSpan.innerText = 0;
     readErrorCountSpan.innerText = 0;
@@ -283,14 +338,14 @@
   			underImage.style.borderBottom = '20px solid blue';
       }
     }
-  })
+  });
   elm.addEventListener('dragleave', function(event) {
     let underImage = document.getElementById(event.target.id);
     if (event.target.classList.contains('imageDiv')) {
       underImage.style.borderTop = '';
 			underImage.style.borderBottom = '';
     }
-  })
+  });
   elm.addEventListener('drop', function(event) {
     let underImage = document.getElementById(event.target.id);
     if (event.target.classList.contains('imageDiv')) {
@@ -311,18 +366,28 @@
     }
 	});
 
-  // 写真の横に表示しているファイル名を変更する処理
+  // 写真横のファイル名を変更する処理と写真の個別削除
   elm.addEventListener('dblclick', (event) => {
     if (event.target.classList.contains('imageCaption')) {
       let result = prompt('変更後のファイル名を入力してください');
-			document.getElementById(event.target.id).innerText = result;
+      if (!result == null) {
+        document.getElementById(event.target.id).innerText = result;
+      }
+    } else if (event.target.classList.contains('thumb')) {
+      elm.removeChild(event.target.parentNode);
+      let imageCount = document.getElementById('imageCount').innerText;
+      let readSuccessCount = document.getElementById('readSuccessCount').innerText;
+      --imageCount;
+      --readSuccessCount;
+      document.getElementById('imageCount').innerText = imageCount;
+      document.getElementById('readSuccessCount').innerText = readSuccessCount;
     }
-  })
+  });
 
   // ヘッダーとして表示する文字列の設定
   document.getElementById('headerText').addEventListener('input', () => {
     document.getElementById('header').innerText = event.target.value;
-  })
+  });
 
   // 画像の幅を動的に変更する設定（表示と印刷両方を同時に変更）
   document.getElementById('imageWidth').addEventListener('input', (e) => {
@@ -338,7 +403,20 @@
     const printThumbStyleIndex = mediaStyleArray.findIndex((mediaStyle) => mediaStyle.selectorText == '.thumb');
     let printThumbStyle = cssStyle[mediaQueryIndex].cssRules[printThumbStyleIndex];
     printThumbStyle.style.setProperty('width', e.target.value + 'px');
-  })
+  });
+
+  // 画像の全削除処理
+  document.getElementById('deleteFileBtn').addEventListener('click', () => {
+    let divImageList = document.getElementById('imageList');
+    while (divImageList.firstChild) {
+      divImageList.removeChild(divImageList.firstChild);
+    }
+    document.getElementById('imageCount').innerText = 0;
+    document.getElementById('readSuccessCount').innerText = 0;
+    document.getElementById('readErrorCount').innerText = 0;
+    document.getElementById('readNotImageCount').innerText = 0;
+    document.getElementById("fileSelector").value = '';
+  });
 
   // ファイル読み込み中のローディング表示切り替え関数
   function toggleLoadingAnimation(signal) {
@@ -354,7 +432,7 @@
       loadingDiv.classList.remove('loading');
       loadingMessageDiv.style.display = 'none';
     }
-  }
+  };
   
   // 読み込んだファイルが画像ファイルならファイルタイプを返し、
   // 画像ファイル以外なら false を返す関数
@@ -379,7 +457,7 @@
       default:
         return false;
     }
-  }
+  };
 
   // 読み込んだ画像データを基にDOMを生成する
   function imageListDom(imageFiles) {
@@ -413,7 +491,7 @@
       imageDiv.insertBefore(imageCaption, null);
       document.getElementById("imageList").insertBefore(imageDiv, null);
     })
-  }
+  };
 
   // arrayBuffer 型の画像データを DataURL に変換する
   // (getImageFormat 関数のために arrayBuffer 型で読み込んでいる)
@@ -424,6 +502,6 @@
       binary += String.fromCharCode(byte);
     })
     return `data:${getImageFormat(arrayBuffer)};base64,${window.btoa(binary)}`;
-  }
+  };
 </script>
 </html>
