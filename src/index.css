@@ -1,0 +1,201 @@
+:root {
+  --icon-width: 18px;
+  --icon-color: black;
+}
+p {
+  margin-top: 0.75em;
+  margin-bottom: 0.2em;
+  /* line-height: 1em; */
+  /* font-size: 1em; */
+}
+label {
+  margin-top: 0.75em;
+  margin-bottom: 0.2em;
+}
+input {
+  margin-top: 0.75em;
+  margin-bottom: 0.2em;
+}
+ul {
+  margin-top: 0.75em;
+  margin-bottom: 0.2em;
+}
+hr {
+  margin-top: 1em;
+}
+#header {
+  display: none;
+  font-size: 1.5em;
+}
+#headerTextLabel, #imageWidthLabel {
+  display: block;
+  margin-bottom: 0.1em;
+}
+#headerText {
+  height: 1.5em;
+  width: 25%;
+  margin-top: 0.1em;
+  font-size: 1em;
+}
+#addFileBtn {
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border: 0;
+  border-radius: 5px;
+  background: #0d6efd;
+  color: white;
+  font-weight: 600;
+}
+#addFileBtn:hover {
+  background: #6ea8fe;
+  cursor: pointer;
+  outline-offset: 0.2em;
+}
+#addFileBtn:focus {
+  background: #6ea8fe;
+  outline-offset: 0.2em;
+}
+#fileSelector {
+  display: none;
+}
+#imageWidth {
+  height: 1.5em;
+  width: 10%;
+  margin-top: 0.1em;
+  font-size: 1em;
+}
+#progressCount {
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+}
+#imageList {
+  margin-top: 1em;
+}
+#deleteFileBtn {
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border: 0;
+  border-radius: 5px;
+  background: #ffc107;
+  color: black;
+  font-weight: 600;
+}
+#deleteFileBtn:hover {
+  background: #ffda6a;
+  cursor: pointer;
+  outline-offset: 0.2em;
+}
+#deleteFileBtn:focus {
+  background: #ffda6a;
+  outline-offset: 0.2em;
+}
+.imageDiv {
+  display: flex;
+  margin-top: 10mm;
+  border: solid 1px gray;
+  background-color: lightcyan;
+  cursor: grab;
+}
+.iconArrowDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.iconArrowUp,
+.iconArrowDown {
+  margin: 0.75em 0.2em 0.75em 0.2em;
+  font-size: 1.5em;
+}
+.thumb {
+  border: solid 1px gray;
+  width: 480px;
+  height: auto;
+}
+.imageCaption {
+  vertical-align: top;
+  margin-left: 1em;
+  margin-right: 10em;
+  background-color: whitesmoke;
+}
+.loadingWrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  opacity: 0.25;
+  position: fixed;
+  top: 8px;
+  left: 8px;
+}
+.loading {
+  margin: auto;
+  border: 20px solid gold;
+  border-radius: 50%;
+  border-top: 20px solid dodgerblue;
+  width: 1vw;
+  height: 1vw;
+  animation: spinner 4s linear infinite;
+  position: absolute;
+  top: calc(50% - 300px);
+  left: calc(50% - 26px);
+  background-color: white;
+  opacity: 1.0;
+  z-index: 999;
+}
+.loadingMessage {
+  display: none;
+  position: absolute;
+  top: calc(50% - 240px);
+  left: calc(50% - 48px);
+  text-align: center;
+}
+@keyframes spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@media print {  
+  body {
+    width: 210mm;
+  }
+  hr {
+    display: none;
+  }
+  #header {
+    display: block;
+    font-size: x-large;
+    text-align: center;
+    position: fixed;
+    top: 10mm;                                              
+    width: 100%;                                            
+    margin-bottom: 5mm;                                     
+  }                                                         
+  li,                                                       
+  #informationDiv, .iconArrowDiv {                                   
+    display: none;                                          
+  }
+  .imageDiv {
+    padding-top: 20mm;
+    padding-left: 25mm;
+    padding-right: 20mm;
+    break-inside: avoid;
+    margin: 0;
+    border: none;
+    background-color: white;
+  }
+  .thumb {
+    width: 480px;
+    height: auto;
+  }
+  .imageCaption {
+    padding-right: 10mm;
+    background-color: white;
+    margin-right: 0;
+  }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
