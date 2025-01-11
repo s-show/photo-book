@@ -80,17 +80,41 @@ hr {
   padding-bottom: 0.5em;
   border: 0;
   border-radius: 5px;
-  background: #ffc107;
-  color: black;
+  background: #df4042;
+  border-color: #b02a37;
+  color: white;
   font-weight: 600;
 }
 #deleteFileBtn:hover {
-  background: #ffda6a;
+  background: #bd3638;
   cursor: pointer;
   outline-offset: 0.2em;
 }
 #deleteFileBtn:focus {
-  background: #ffda6a;
+  background: #bd3638;
+  outline-offset: 0.2em;
+}
+#reduceImage  {
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border: 0;
+  border-radius: 5px;
+  background: #ffc600;
+  border-color: #ffc720;
+  color: black;
+  font-weight: 600;
+}
+#reduceImage:hover  {
+  background: #ffcf04;
+  border-color: #ffc720;
+  cursor: pointer;
+  outline-offset: 0.2em;
+}
+#reduceImage:focus  {
+  background: #ffcf04;
+  border-color: #ffc720;
   outline-offset: 0.2em;
 }
 .imageDiv {

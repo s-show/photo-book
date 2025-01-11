@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>写真帳作成ページ</title>
-  <link id="css" rel="stylesheet" href="./_index.css">
+  <link id="css" rel="stylesheet" href="./index.css">
 </head>
 <body>
   <div class="header" id="header"></div>
@@ -28,23 +28,16 @@
         <!-- <li>画像横の矢印で画僧を上下に移動できます</li> -->
         <li>画像をダブルクリックすると削除できます</li>
       </ul>
-      <label id="imageWidthLabel" for="imageWidth">画像サイズを指定できます（縦横比は維持されます）</label>
-      <input type="number" id="imageWidth" min="100" step="10" value="480">
-      <div id="progressCount">
-        <span>対象ファイル数: </span>
-        <span id="imageCount">0</span>
-        <span>, 成功: </span>
-        <span id="readSuccessCount">0</span>
-        <span>, 失敗: </span>
-        <span id="readErrorCount">0</span>
-        <span>, 画像以外: </span>
-        <span id="readNotImageCount">0</span>
+      <div>
+        <label id="imageWidthLabel" for="imageWidth">画像サイズを指定できます（縦横比は維持されます）</label>
+        <input type="number" id="imageWidth" min="100" step="10" value="480">
       </div>
       <button id="deleteFileBtn">画像を全て削除</button>
+      <button id="reduceImage">印刷用に画像を縮小</button>
     </div>
     <hr>
     <div id="imageList"></div>
   </div>
 </body>
-<script src="./_index.js"></script>
+<script src="./index.js"></script>
 </html>
