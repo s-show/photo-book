@@ -18,8 +18,5 @@
   "bugs": {
     "url": "https://github.com/s-show/photo-book/issues"
   },
-  "homepage": "https://github.com/s-show/photo-book#readme",
-  "devDependencies": {
-    "html-includes": "^5.0.0"
-  }
+  "homepage": "https://github.com/s-show/photo-book#readme"
 }
