@@ -23,9 +23,35 @@ ul {
 hr {
   margin-top: 1em;
 }
-#header {
-  display: none;
-  font-size: 1.5em;
+details {
+  width: 50%;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border: 2px solid #27acd9;
+}
+details summary {
+  width: 100%;
+  padding: 0.5rem 0;
+  position: relative;
+  cursor: pointer;
+  list-style: none;
+}
+details summary:after {
+  content: "+";
+  color: black;
+  position: absolute;
+  font-size: 1.75rem;
+  line-height: 0;
+  margin-top: 0.75rem;
+  right: 0;
+  transform-origin: center;
+  transition: 200ms linear;
+}
+details[open] summary:after {
+  transform: rotate(45deg);
+  padding: 0.5rem 0 0 0;
+  font-size: 1.75em;
 }
 #headerTextLabel, #imageWidthLabel {
   display: block;
@@ -38,27 +64,97 @@ hr {
   font-size: 1em;
 }
 #addFileBtn {
-  padding-left: 1em;
-  padding-right: 1em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  border: 0;
-  border-radius: 5px;
-  background: #0d6efd;
+  vertical-align: middle;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  border: 2px solid #3d83ff;
+  border-radius: 100vh;
+  background: #3d83ff;
   color: white;
   font-weight: 600;
+  box-shadow: 3px 3px 3px gray;
 }
 #addFileBtn:hover {
-  background: #6ea8fe;
   cursor: pointer;
-  outline-offset: 0.2em;
+  box-shadow: 3px 3px 3px 1px gray;
 }
 #addFileBtn:focus {
-  background: #6ea8fe;
-  outline-offset: 0.2em;
+  box-shadow: 3px 3px 3px 1px gray;
+}
+#addFileBtn:active {
+  margin-top: 2px;
+  margin-bottom: -2px;
+  box-shadow: 1px 1px 1px gray;
 }
 #fileSelector {
   display: none;
+}
+#deleteFileBtn {
+  vertical-align: middle;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin-left: 1em;
+  border: 2px solid #df4042;
+  border-radius: 100vh;
+  background: #df4042;
+  color: white;
+  font-weight: 600;
+  box-shadow: 3px 3px 3px gray;
+}
+#deleteFileBtn:hover {
+  cursor: pointer;
+  box-shadow: 3px 3px 3px gray;
+}
+#deleteFileBtn:focus {
+  box-shadow: 3px 3px 3px gray;
+}
+#deleteFileBtn:active {
+  margin-top: 2px;
+  margin-bottom: -2px;
+  box-shadow: 1px 1px 1px gray;
+}
+#deleteFileBtn:disabled {
+  background: #f3b0b4;
+  border: 2px solid #df4042;
+  color: gray;
+  cursor: not-allowed;
+}
+#exportWordBtn  {
+  vertical-align: middle;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin-left: 1em;
+  border: 0;
+  border: 2px solid #ffc720;
+  border-radius: 100vh;
+  background: #ffc600;
+  color: gray;
+  font-weight: 600;
+  box-shadow: 3px 3px 3px gray;
+}
+#exportWordBtn:hover  {
+  cursor: pointer;
+  box-shadow: 3px 3px 3px gray;
+}
+#exportWordBtn:focus  {
+  box-shadow: 3px 3px 3px gray;
+}
+#exportWordBtn:active {
+  margin-top: 2px;
+  margin-bottom: -2px;
+  box-shadow: 1px 1px 1px gray;
+}
+#exportWordBtn:disabled {
+  background: #ffe998;
+  border: 2px solid #ffc720;
+  color: gray;
+  cursor: not-allowed;
 }
 #imageWidth {
   height: 1.5em;
@@ -73,49 +169,9 @@ hr {
 #imageList {
   margin-top: 1em;
 }
-#deleteFileBtn {
-  padding-left: 1em;
-  padding-right: 1em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  border: 0;
-  border-radius: 5px;
-  background: #df4042;
-  border-color: #b02a37;
-  color: white;
-  font-weight: 600;
-}
-#deleteFileBtn:hover {
-  background: #bd3638;
-  cursor: pointer;
-  outline-offset: 0.2em;
-}
-#deleteFileBtn:focus {
-  background: #bd3638;
-  outline-offset: 0.2em;
-}
-#reduceImage  {
-  padding-left: 1em;
-  padding-right: 1em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  border: 0;
-  border-radius: 5px;
-  background: #ffc600;
-  border-color: #ffc720;
-  color: black;
-  font-weight: 600;
-}
-#reduceImage:hover  {
-  background: #ffcf04;
-  border-color: #ffc720;
-  cursor: pointer;
-  outline-offset: 0.2em;
-}
-#reduceImage:focus  {
-  background: #ffcf04;
-  border-color: #ffc720;
-  outline-offset: 0.2em;
+.header {
+  display: none;
+  font-size: 1.5em;
 }
 .imageDiv {
   display: flex;
@@ -124,19 +180,9 @@ hr {
   background-color: lightcyan;
   cursor: grab;
 }
-.iconArrowDiv {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-}
-.iconArrowUp,
-.iconArrowDown {
-  margin: 0.75em 0.2em 0.75em 0.2em;
-  font-size: 1.5em;
-}
 .thumb {
   border: solid 1px gray;
-  width: 480px;
+  /* width: 480px; */
   height: auto;
 }
 .imageCaption {
@@ -187,15 +233,17 @@ hr {
   hr {
     display: none;
   }
-  #header {
+  .header {
     display: block;
-    font-size: x-large;
+    margin-top: 10mm;
+    margin-bottom: 5mm;
+  }
+  #header {
+    width: 100%;
     text-align: center;
     position: fixed;
-    top: 10mm;                                              
-    width: 100%;                                            
-    margin-bottom: 5mm;                                     
-  }                                                         
+    font-size: x-large;
+  }
   li,                                                       
   #informationDiv, .iconArrowDiv {                                   
     display: none;                                          
@@ -223,3 +271,4 @@ hr {
     margin: 0;
   }
 }
+
