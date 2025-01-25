@@ -22,6 +22,7 @@
         <input type="file" id="fileSelector" accept="image/*" multiple />
         <button id="deleteFileBtn" disabled>画像を全て削除</button>
         <button id="exportWordBtn" disabled>Wordファイルで保存</button>
+        <button id="printBtn" disabled>印刷</button>
       </div>
       <details open>
         <summary>使い方など</summary>
@@ -33,6 +34,7 @@
           <li>画像をダブルクリックすると削除できます</li>
           <li>画像のサイズは、印刷プレビューで確認して適宜調整してください。</li>
           <li>印刷やWordファイルで保存する場合、ボタンやこのヘルプなどは出力されません。</li>
+          <li>画像サイズは、360だとA4用紙に2～3枚、480だと2枚ぐらいになります。</li>
         </ul>
       </details>
       <div>
@@ -41,7 +43,7 @@
       </div>
       <div>
         <label id="imageWidthLabel" for="imageWidth">画像サイズを指定できます（縦横比は維持されます）</label>
-        <input type="number" id="imageWidth" min="100" step="10" value="480">
+        <input type="number" id="imageWidth" min="100" step="10" value="360">
       </div>
     </div>
     <hr>

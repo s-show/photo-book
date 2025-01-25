@@ -156,6 +156,32 @@ details[open] summary:after {
   color: gray;
   cursor: not-allowed;
 }
+#printBtn {
+  vertical-align: middle;
+  padding-left: 2em;
+  padding-right: 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  margin-left: 1em;
+  border: 2px solid #aec6cf;
+  border-radius: 100vh;
+  background: #aec6cf;
+  color: white;
+  font-weight: 600;
+  box-shadow: 3px 3px 3px gray;
+}
+#printBtn:hover {
+  cursor: pointer;
+  box-shadow: 3px 3px 3px 1px gray;
+}
+#printBtn:focus {
+  box-shadow: 3px 3px 3px 1px gray;
+}
+#printBtn:active {
+  margin-top: 2px;
+  margin-bottom: -2px;
+  box-shadow: 1px 1px 1px gray;
+}
 #imageWidth {
   height: 1.5em;
   width: 10%;

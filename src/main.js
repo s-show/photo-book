@@ -70,6 +70,7 @@ function imageListDom(imageFiles) {
   });
   document.getElementById("deleteFileBtn").removeAttribute("disabled");
   document.getElementById("exportWordBtn").removeAttribute("disabled");
+  document.getElementById("printBtn").removeAttribute("disabled");
 }
 // ファイル読み込み中のローディング表示切り替え関数
 function toggleLoadingAnimation(signal) {
@@ -177,7 +178,13 @@ document.getElementById("deleteFileBtn").addEventListener("click", () => {
   document.getElementById("fileSelector").value = "";
   document.getElementById("deleteFileBtn").setAttribute("disabled", "");
   document.getElementById("exportWordBtn").setAttribute("disabled", "");
+  document.getElementById("printBtn").setAttribute("disabled", "");
   stush.empty();
+});
+
+// 印刷プレビュー表示
+document.getElementById("printBtn").addEventListener("click", () => {
+  window.print();
 });
 
 // 画像の縮小関数
