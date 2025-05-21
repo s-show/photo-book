@@ -2,27 +2,33 @@
   --icon-width: 18px;
   --icon-color: black;
 }
+
 p {
   margin-top: 0.75em;
   margin-bottom: 0.2em;
   /* line-height: 1em; */
   /* font-size: 1em; */
 }
+
 label {
   margin-top: 0.75em;
   margin-bottom: 0.2em;
 }
+
 input {
   margin-top: 0.75em;
   margin-bottom: 0.2em;
 }
+
 ul {
   margin-top: 0.75em;
   margin-bottom: 0.2em;
 }
+
 hr {
   margin-top: 1em;
 }
+
 details {
   width: 50%;
   padding: 0.5rem;
@@ -30,6 +36,7 @@ details {
   margin-bottom: 1rem;
   border: 2px solid #27acd9;
 }
+
 details summary {
   width: 100%;
   padding: 0.5rem 0;
@@ -37,6 +44,7 @@ details summary {
   cursor: pointer;
   list-style: none;
 }
+
 details summary:after {
   content: "+";
   color: black;
@@ -48,157 +56,185 @@ details summary:after {
   transform-origin: center;
   transition: 200ms linear;
 }
+
 details[open] summary:after {
   transform: rotate(45deg);
   padding: 0.5rem 0 0 0;
   font-size: 1.75em;
 }
-#headerTextLabel, #imageWidthLabel {
+
+#headerTextLabel,
+#imageWidthLabel {
   display: block;
   margin-bottom: 0.1em;
 }
+
 #headerText {
   height: 1.5em;
   width: 25%;
   margin-top: 0.1em;
   font-size: 1em;
 }
-#addFileBtn {
-  vertical-align: middle;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  border: 2px solid #3d83ff;
-  border-radius: 100vh;
-  background: #3d83ff;
-  color: white;
-  font-weight: 600;
-  box-shadow: 3px 3px 3px gray;
-}
-#addFileBtn:hover {
-  cursor: pointer;
-  box-shadow: 3px 3px 3px 1px gray;
-}
-#addFileBtn:focus {
-  box-shadow: 3px 3px 3px 1px gray;
-}
-#addFileBtn:active {
-  margin-top: 2px;
-  margin-bottom: -2px;
-  box-shadow: 1px 1px 1px gray;
-}
+
+/* #addFileBtn { */
+/*   vertical-align: middle; */
+/*   padding-left: 2em; */
+/*   padding-right: 2em; */
+/*   padding-top: 1em; */
+/*   padding-bottom: 1em; */
+/*   border: 2px solid #3d83ff; */
+/*   border-radius: 100vh; */
+/*   background: #3d83ff; */
+/*   color: white; */
+/*   font-weight: 600; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #addFileBtn:hover { */
+/*   cursor: pointer; */
+/*   box-shadow: 3px 3px 3px 1px gray; */
+/* } */
+/**/
+/* #addFileBtn:focus { */
+/*   box-shadow: 3px 3px 3px 1px gray; */
+/* } */
+/**/
+/* #addFileBtn:active { */
+/*   margin-top: 2px; */
+/*   margin-bottom: -2px; */
+/*   box-shadow: 1px 1px 1px gray; */
+/* } */
+/**/
 #fileSelector {
   display: none;
 }
-#deleteFileBtn {
-  vertical-align: middle;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  margin-left: 1em;
-  border: 2px solid #df4042;
-  border-radius: 100vh;
-  background: #df4042;
-  color: white;
-  font-weight: 600;
-  box-shadow: 3px 3px 3px gray;
-}
-#deleteFileBtn:hover {
-  cursor: pointer;
-  box-shadow: 3px 3px 3px gray;
-}
-#deleteFileBtn:focus {
-  box-shadow: 3px 3px 3px gray;
-}
-#deleteFileBtn:active {
-  margin-top: 2px;
-  margin-bottom: -2px;
-  box-shadow: 1px 1px 1px gray;
-}
-#deleteFileBtn:disabled {
-  background: #f3b0b4;
-  border: 2px solid #df4042;
-  color: gray;
-  cursor: not-allowed;
-}
-#exportWordBtn  {
-  vertical-align: middle;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  margin-left: 1em;
-  border: 0;
-  border: 2px solid #ffc720;
-  border-radius: 100vh;
-  background: #ffc600;
-  color: gray;
-  font-weight: 600;
-  box-shadow: 3px 3px 3px gray;
-}
-#exportWordBtn:hover  {
-  cursor: pointer;
-  box-shadow: 3px 3px 3px gray;
-}
-#exportWordBtn:focus  {
-  box-shadow: 3px 3px 3px gray;
-}
-#exportWordBtn:active {
-  margin-top: 2px;
-  margin-bottom: -2px;
-  box-shadow: 1px 1px 1px gray;
-}
-#exportWordBtn:disabled {
-  background: #ffe998;
-  border: 2px solid #ffc720;
-  color: gray;
-  cursor: not-allowed;
-}
-#printBtn {
-  vertical-align: middle;
-  padding-left: 2em;
-  padding-right: 2em;
-  padding-top: 1em;
-  padding-bottom: 1em;
-  margin-left: 1em;
-  border: 2px solid #aec6cf;
-  border-radius: 100vh;
-  background: #aec6cf;
-  color: white;
-  font-weight: 600;
-  box-shadow: 3px 3px 3px gray;
-}
-#printBtn:hover {
-  cursor: pointer;
-  box-shadow: 3px 3px 3px 1px gray;
-}
-#printBtn:focus {
-  box-shadow: 3px 3px 3px 1px gray;
-}
-#printBtn:active {
-  margin-top: 2px;
-  margin-bottom: -2px;
-  box-shadow: 1px 1px 1px gray;
-}
+/**/
+/* #deleteFileBtn { */
+/*   vertical-align: middle; */
+/*   padding-left: 2em; */
+/*   padding-right: 2em; */
+/*   padding-top: 1em; */
+/*   padding-bottom: 1em; */
+/*   margin-left: 1em; */
+/*   border: 2px solid #df4042; */
+/*   border-radius: 100vh; */
+/*   background: #df4042; */
+/*   color: white; */
+/*   font-weight: 600; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #deleteFileBtn:hover { */
+/*   cursor: pointer; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #deleteFileBtn:focus { */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #deleteFileBtn:active { */
+/*   margin-top: 2px; */
+/*   margin-bottom: -2px; */
+/*   box-shadow: 1px 1px 1px gray; */
+/* } */
+/**/
+/* #deleteFileBtn:disabled { */
+/*   background: #f3b0b4; */
+/*   border: 2px solid #df4042; */
+/*   color: gray; */
+/*   cursor: not-allowed; */
+/* } */
+/**/
+/* #exportWordBtn { */
+/*   vertical-align: middle; */
+/*   padding-left: 2em; */
+/*   padding-right: 2em; */
+/*   padding-top: 1em; */
+/*   padding-bottom: 1em; */
+/*   margin-left: 1em; */
+/*   border: 0; */
+/*   border: 2px solid #ffc720; */
+/*   border-radius: 100vh; */
+/*   background: #ffc600; */
+/*   color: gray; */
+/*   font-weight: 600; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #exportWordBtn:hover { */
+/*   cursor: pointer; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #exportWordBtn:focus { */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #exportWordBtn:active { */
+/*   margin-top: 2px; */
+/*   margin-bottom: -2px; */
+/*   box-shadow: 1px 1px 1px gray; */
+/* } */
+/**/
+/* #exportWordBtn:disabled { */
+/*   background: #ffe998; */
+/*   border: 2px solid #ffc720; */
+/*   color: gray; */
+/*   cursor: not-allowed; */
+/* } */
+/**/
+/* #printBtn { */
+/*   vertical-align: middle; */
+/*   padding-left: 2em; */
+/*   padding-right: 2em; */
+/*   padding-top: 1em; */
+/*   padding-bottom: 1em; */
+/*   margin-left: 1em; */
+/*   border: 2px solid #aec6cf; */
+/*   border-radius: 100vh; */
+/*   background: #aec6cf; */
+/*   color: white; */
+/*   font-weight: 600; */
+/*   box-shadow: 3px 3px 3px gray; */
+/* } */
+/**/
+/* #printBtn:hover { */
+/*   cursor: pointer; */
+/*   box-shadow: 3px 3px 3px 1px gray; */
+/* } */
+/**/
+/* #printBtn:focus { */
+/*   box-shadow: 3px 3px 3px 1px gray; */
+/* } */
+/**/
+/* #printBtn:active { */
+/*   margin-top: 2px; */
+/*   margin-bottom: -2px; */
+/*   box-shadow: 1px 1px 1px gray; */
+/* } */
+
 #imageWidth {
   height: 1.5em;
   width: 10%;
   margin-top: 0.1em;
   font-size: 1em;
 }
+
 #progressCount {
   margin-top: 1em;
   margin-bottom: 0.2em;
 }
+
 #imageList {
   margin-top: 1em;
 }
+
 .header {
   display: none;
   font-size: 1.5em;
 }
+
 .imageDiv {
   display: flex;
   margin-top: 10mm;
@@ -206,17 +242,20 @@ details[open] summary:after {
   background-color: lightcyan;
   cursor: grab;
 }
+
 .thumb {
   border: solid 1px gray;
   /* width: 480px; */
   height: auto;
 }
+
 .imageCaption {
   vertical-align: top;
   margin-left: 1em;
   margin-right: 10em;
   background-color: whitesmoke;
 }
+
 .loadingWrapper {
   width: 100vw;
   height: 100vh;
@@ -226,6 +265,7 @@ details[open] summary:after {
   top: 8px;
   left: 8px;
 }
+
 .loading {
   margin: auto;
   border: 20px solid gold;
@@ -241,6 +281,7 @@ details[open] summary:after {
   opacity: 1.0;
   z-index: 999;
 }
+
 .loadingMessage {
   display: none;
   position: absolute;
@@ -248,32 +289,189 @@ details[open] summary:after {
   left: calc(50% - 48px);
   text-align: center;
 }
-@keyframes spinner {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+
+/* ダウンロード/アクションボタン共通スタイル */
+.action-button {
+  display: inline-flex;
+  /* アイコンとテキストをインラインで横並びにする */
+  align-items: center;
+  /* アイコンとテキストを垂直方向に中央揃え */
+  padding: 14px 28px;
+  /* ボタンの内側の余白 (上下 左右) */
+  color: #ffffff;
+  /* テキストの色を白に */
+  text-decoration: none;
+  /* リンクの下線を削除 */
+  font-weight: 600;
+  /* 文字の太さ */
+  border-radius: 8px;
+  /* ボタンの角を丸くする */
+  border: none;
+  /* ボタンの枠線をなしに */
+  cursor: pointer;
+  /* マウスオーバー時にカーソルをポインターに変更 */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  /* アニメーション効果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* ボタンに影を付ける */
+  font-size: 16px;
+  /* フォントサイズ */
+  white-space: nowrap;
+  /* テキストが折り返さないようにする */
 }
-@media print {  
+
+/* ボタン共通のマウスオーバー時のスタイル */
+.action-button:hover {
+  transform: translateY(-2px);
+  /* ボタンを少し上に移動させる */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  /* 影を少し濃くする */
+}
+
+/* ボタン共通のクリック時（アクティブ時）のスタイル */
+.action-button:active {
+  transform: translateY(0);
+  /* ボタンの位置を元に戻す */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 影を少し薄くする */
+}
+
+/* Wordボタン特有のスタイル */
+.word-button {
+  background-color: #2b579a;
+  /* Wordのブランドカラーに近い青色 */
+}
+
+.word-button:hover {
+  background-color: #1f3d70;
+}
+
+.word-button:active {
+  background-color: #1a335c;
+}
+
+/* Excelボタン特有のスタイル */
+.excel-button {
+  background-color: #1D6F42;
+  /* Excelのブランドカラーに近い緑色 */
+}
+
+.excel-button:hover {
+  background-color: #165934;
+}
+
+.excel-button:active {
+  background-color: #0F4025;
+}
+
+/* 画像読み込みボタン特有のスタイル */
+.image-load-button {
+  background-color: #007bff;
+  /* 明るい青 */
+}
+
+.image-load-button:hover {
+  background-color: #0056b3;
+}
+
+.image-load-button:active {
+  background-color: #004085;
+}
+
+/* 画像削除ボタン特有のスタイル */
+.image-delete-button {
+  background-color: #dc3545;
+  /* 赤色 */
+}
+
+.image-delete-button:hover {
+  background-color: #c82333;
+}
+
+.image-delete-button:active {
+  background-color: #bd2130;
+}
+
+/* 印刷ボタン特有のスタイル */
+.print-button {
+  background-color: #6c757d;
+  /* グレー */
+}
+
+.print-button:hover {
+  background-color: #5a6268;
+}
+
+.print-button:active {
+  background-color: #545b62;
+}
+
+
+/* SVGアイコン共通のスタイル */
+.action-button .btn-icon {
+  width: 1.2em;
+  /* アイコンの幅 */
+  height: 1.2em;
+  /* アイコンの高さ */
+  margin-right: 10px;
+  /* アイコンとテキストの間の余白 */
+  fill: currentColor;
+  /* アイコンの色をテキストの色に合わせる (白) */
+}
+
+/* テキスト部分のスタイル */
+.action-button span {
+  line-height: 1;
+  /* テキストの行の高さを調整 */
+}
+
+
+
+
+
+
+
+
+
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media print {
   body {
     width: 210mm;
   }
+
   hr {
     display: none;
   }
+
   .header {
     display: block;
     margin-top: 10mm;
     margin-bottom: 5mm;
   }
+
   #header {
     width: 100%;
     text-align: center;
     position: fixed;
     font-size: x-large;
   }
-  li,                                                       
-  #informationDiv, .iconArrowDiv {                                   
-    display: none;                                          
+
+  li,
+  #informationDiv,
+  .iconArrowDiv {
+    display: none;
   }
+
   .imageDiv {
     padding-top: 20mm;
     padding-left: 25mm;
@@ -283,18 +481,20 @@ details[open] summary:after {
     border: none;
     background-color: white;
   }
+
   .thumb {
     width: 480px;
     height: auto;
   }
+
   .imageCaption {
     padding-right: 10mm;
     background-color: white;
     margin-right: 0;
   }
+
   @page {
     size: A4;
     margin: 0;
   }
 }
-

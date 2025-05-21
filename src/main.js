@@ -1,304 +1,281 @@
-// 画像の追加処理
-document.getElementById("addFileBtn").addEventListener("click", (e) => {
-  document.getElementById("fileSelector").click();
-});
-document.getElementById("fileSelector").addEventListener("change", (e) => {
-  if (e.target.files.length == 0) {
-    console.log("file not selected.");
-    return;
-  }
-  const imageFiles = [];
-  let fileCount = 0;
+import * as ExcelJS from 'exceljs';
 
-  toggleLoadingAnimation(true);
-
-  Array.from(e.target.files).forEach((file, index, array) => {
-    const fileReader = new FileReader();
-    fileReader.addEventListener("error", () => {
-      console.error("read error: " + file.name);
-      fileCount++;
-      if (fileCount == array.length) {
-        imageListDom(imageFiles);
-      }
-    });
-    fileReader.addEventListener("load", (e) => {
-      fileCount++;
-      const imageFile = { name: "", image: "" };
-      imageFile.name = file.name;
-      imageFile.image = e.target.result;
-      imageFiles.push(imageFile);
-      if (fileCount == array.length) {
-        imageListDom(imageFiles);
-        toggleLoadingAnimation(false);
-      }
-    });
-    fileReader.readAsDataURL(file);
+// ファイルを DataURL として読み込むヘルパー
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(`Failed to read ${file.name}`));
+    reader.onload = () => resolve({ name: file.name, dataUrl: reader.result });
+    reader.readAsDataURL(file);
   });
-});
-// 読み込んだ画像データを基にDOMを生成する
-function imageListDom(imageFiles) {
-  // imageFiles の画像ファイルをファイル名で並べ替える
-  // （ファイル読み込みが非同期なので順番がランダム）
-  imageFiles.sort((a, b) => {
-    if (a.name < b.name) {
-      return -1;
-    }
-    if (a.name > b.name) {
-      return 1;
-    }
-    return 0;
-  });
-  imageFiles.forEach((imageFile) => {
-    const imageDiv = document.createElement("div");
-    imageDiv.className = "imageDiv";
-    imageDiv.setAttribute("id", imageFile.name + "_Div");
-    imageDiv.setAttribute("draggable", true);
-
-    const image = document.createElement("img");
-    image.className = "thumb";
-    image.style.width = document.getElementById('imageWidth').value + 'px';
-    image.src = imageFile.image;
-    
-    const imageCaption = document.createElement("span");
-    imageCaption.innerText = imageFile.name.split(".")[0];
-    imageCaption.className = "imageCaption";
-    imageCaption.setAttribute("id", imageFile.name + "_Span");
-
-    imageDiv.insertBefore(image, null);
-    imageDiv.insertBefore(imageCaption, null);
-    document.getElementById("imageList").insertBefore(imageDiv, null);
-  });
-  document.getElementById("deleteFileBtn").removeAttribute("disabled");
-  document.getElementById("exportWordBtn").removeAttribute("disabled");
-  document.getElementById("printBtn").removeAttribute("disabled");
 }
-// ファイル読み込み中のローディング表示切り替え関数
-function toggleLoadingAnimation(signal) {
-  const loadingMessageDiv = document.getElementById("loadingMessage");
-  const loadingWrapperDiv = document.getElementById("content");
-  const loadingDiv = document.getElementById("loading");
-  if (signal) {
-    loadingWrapperDiv.classList.add("loadingWrapper");
-    loadingDiv.classList.add("loading");
-    loadingMessageDiv.style.display = "block";
-  } else {
-    loadingWrapperDiv.classList.remove("loadingWrapper");
-    loadingDiv.classList.remove("loading");
-    loadingMessageDiv.style.display = "none";
+
+// 画像ソースを一時退避するスタック
+class TempImageStack {
+  constructor() {
+    this.images = [];
+  }
+  push(src) {
+    this.images.push(src);
+  }
+  shift() {
+    return this.images.shift();
+  }
+  clear() {
+    this.images = [];
   }
 }
 
-// ドラッグで順番を入れ替える処理
-const elm = document.getElementById("imageList");
-elm.addEventListener("dragstart", (event) => {
-  if (event.target.classList.contains("imageDiv")) {
-    event.dataTransfer.setData("text/plain", event.target.id);
+class PhotoBookApp {
+  constructor() {
+    // DOM 要素取得
+    this.addFileBtn = document.getElementById("addFileBtn");
+    this.fileSelector = document.getElementById("fileSelector");
+    this.imageList = document.getElementById("imageList");
+    this.deleteFileBtn = document.getElementById("deleteFileBtn");
+    this.exportWordBtn = document.getElementById("exportWordBtn");
+    this.exportExcelBtn = document.getElementById("exportExcelBtn");
+    this.printBtn = document.getElementById("printBtn");
+    this.headerText = document.getElementById("headerText");
+    this.header = document.getElementById("header");
+    this.imageWidthInput = document.getElementById("imageWidth");
+    this.loadingMessage = document.getElementById("loadingMessage");
+    this.content = document.getElementById("content");
+    this.loading = document.getElementById("loading");
+
+    this.tempStack = new TempImageStack();
+    this.bindEvents();
   }
-});
-elm.addEventListener("dragover", (event) => {
-  const underImage = document.getElementById(event.target.id);
-  if (event.target.classList.contains("imageDiv")) {
+
+  bindEvents() {
+    this.addFileBtn.addEventListener("click", () => this.fileSelector.click());
+    this.fileSelector.addEventListener("change", (e) => this.handleFileSelection(e));
+    this.imageList.addEventListener("dragstart", (e) => this.onDragStart(e));
+    this.imageList.addEventListener("dragover", (e) => this.onDragOver(e));
+    this.imageList.addEventListener("dragleave", (e) => this.onDragLeave(e));
+    this.imageList.addEventListener("drop", (e) => this.onDrop(e));
+    this.imageList.addEventListener("dblclick", (e) => this.onImageListDblClick(e));
+    this.headerText.addEventListener("input", (e) => (this.header.innerText = e.target.value));
+    this.imageWidthInput.addEventListener("input", (e) => this.onImageWidthChange(e));
+    this.deleteFileBtn.addEventListener("click", () => this.clearImages());
+    this.printBtn.addEventListener("click", () => window.print());
+    this.exportWordBtn.addEventListener("click", () => this.handleExportWord());
+    this.exportExcelBtn.addEventListener("click", () => this.handleExportExcel());
+    window.addEventListener("beforeprint", () => this.handleBeforePrint());
+    window.addEventListener("afterprint", () => this.handleAfterPrint());
+  }
+
+  async handleFileSelection(event) {
+    const files = Array.from(event.target.files);
+    if (!files.length) {
+      console.log("No file selected.");
+      return;
+    }
+
+    this.toggleLoading(true);
+    try {
+      const imageFiles = await Promise.all(files.map(readFileAsDataURL));
+      imageFiles.sort((a, b) => a.name.localeCompare(b.name));
+      this.createImageList(imageFiles);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.toggleLoading(false);
+    }
+  }
+
+  createImageList(imageFiles) {
+    const fragment = document.createDocumentFragment();
+
+    imageFiles.forEach(({ name, dataUrl }) => {
+      const div = document.createElement("div");
+      div.className = "imageDiv";
+      div.id = `${name}_Div`;
+      div.draggable = true;
+
+      const img = document.createElement("img");
+      img.className = "thumb";
+      img.src = dataUrl;
+      img.style.width = `${this.imageWidthInput.value}px`;
+
+      const span = document.createElement("span");
+      span.className = "imageCaption";
+      span.id = `${name}_Span`;
+      span.innerText = name.replace(/\.[^/.]+$/, "");
+
+      div.appendChild(img);
+      div.appendChild(span);
+      fragment.appendChild(div);
+    });
+
+    this.imageList.appendChild(fragment);
+    this.deleteFileBtn.disabled = false;
+    this.exportWordBtn.disabled = false;
+    this.exportExcelBtn.disabled = false;
+    this.printBtn.disabled = false;
+  }
+
+  toggleLoading(active) {
+    this.content.classList.toggle("loadingWrapper", active);
+    this.loading.classList.toggle("loading", active);
+    this.loadingMessage.style.display = active ? "block" : "none";
+  }
+
+  onDragStart(event) {
+    if (event.target.classList.contains("imageDiv")) {
+      event.dataTransfer.setData("text/plain", event.target.id);
+    }
+  }
+
+  onDragOver(event) {
+    const target = event.target.closest(".imageDiv");
+    if (!target) return;
     event.preventDefault();
-    const rect = underImage.getBoundingClientRect();
-    if ((event.clientY - rect.top) < (underImage.clientHeight / 2)) {
-      //マウスカーソルの位置が要素の半分より上
-      underImage.style.borderTop = "20px solid blue";
-      underImage.style.borderBottom = "";
-    } else {
-      //マウスカーソルの位置が要素の半分より下
-      underImage.style.borderTop = "";
-      underImage.style.borderBottom = "20px solid blue";
-    }
+    const rect = target.getBoundingClientRect();
+    const isUpper = (event.clientY - rect.top) < (target.clientHeight / 2);
+    target.style.borderTop = isUpper ? "20px solid blue" : "";
+    target.style.borderBottom = !isUpper ? "20px solid blue" : "";
   }
-});
-elm.addEventListener("dragleave", (event) => {
-  const underImage = document.getElementById(event.target.id);
-  if (event.target.classList.contains("imageDiv")) {
-    underImage.style.borderTop = "";
-    underImage.style.borderBottom = "";
+
+  onDragLeave(event) {
+    const target = event.target.closest(".imageDiv");
+    if (!target) return;
+    target.style.borderTop = "";
+    target.style.borderBottom = "";
   }
-});
-elm.addEventListener("drop", (event) => {
-  const underImage = document.getElementById(event.target.id);
-  if (event.target.classList.contains("imageDiv")) {
+
+  onDrop(event) {
+    const target = event.target.closest(".imageDiv");
+    if (!target) return;
     event.preventDefault();
     const id = event.dataTransfer.getData("text/plain");
-    const elm_drag = document.getElementById(id);
+    const dragged = document.getElementById(id);
+    const rect = target.getBoundingClientRect();
+    const isUpper = (event.clientY - rect.top) < (target.clientHeight / 2);
 
-    const rect = underImage.getBoundingClientRect();
-    if ((event.clientY - rect.top) < (underImage.clientHeight / 2)) {
-      //マウスカーソルの位置が要素の半分より上
-      underImage.parentNode.insertBefore(elm_drag, underImage);
-    } else {
-      //マウスカーソルの位置が要素の半分より下
-      underImage.parentNode.insertBefore(elm_drag, underImage.nextSibling);
-    }
-    underImage.style.borderTop = "";
-    underImage.style.borderBottom = "";
-  }
-});
-
-// 写真横のファイル名を変更する処理と写真の個別削除
-elm.addEventListener("dblclick", (e) => {
-  if (e.target.classList.contains("imageCaption")) {
-    const result = prompt("変更後のファイル名を入力してください");
-    if (result != null) {
-      document.getElementById(e.target.id).innerText = result;
-    }
-  } else if (e.target.classList.contains("thumb")) {
-    elm.removeChild(e.target.parentNode);
-    if (document.querySelectorAll(".thumb").length == 0) {
-      document.getElementById("fileSelector").value = "";
-      document.getElementById("deleteFileBtn").setAttribute("disabled", "");
-      document.getElementById("exportWordBtn").setAttribute("disabled", "");
-      stush.empty();
-    }
-  }
-});
-
-// ヘッダーとして表示する文字列の設定
-document.getElementById("headerText").addEventListener("input", (e) => {
-  document.getElementById("header").innerText = e.target.value;
-});
-
-// 画像の幅を動的に変更する設定（表示と印刷両方を同時に変更）
-document.getElementById("imageWidth").addEventListener("input", (e) => {
-  const thumbClass = document.querySelectorAll(".thumb");
-  thumbClass.forEach((elem) => {
-    elem.style.setProperty("width", e.target.value + "px");
-  });
-});
-
-// 画像の全削除処理
-document.getElementById("deleteFileBtn").addEventListener("click", () => {
-  const divImageList = document.getElementById("imageList");
-  while (divImageList.firstChild) {
-    divImageList.removeChild(divImageList.firstChild);
-  }
-  document.getElementById("fileSelector").value = "";
-  document.getElementById("deleteFileBtn").setAttribute("disabled", "");
-  document.getElementById("exportWordBtn").setAttribute("disabled", "");
-  document.getElementById("printBtn").setAttribute("disabled", "");
-  stush.empty();
-});
-
-// 印刷プレビュー表示
-document.getElementById("printBtn").addEventListener("click", () => {
-  window.print();
-});
-
-// 画像の縮小関数
-function resizeImage(image, ratio) {
-  const canvas = document.createElement("canvas");
-  canvas.width = image.clientWidth * ratio;
-  canvas.height = image.clientHeight * ratio;
-  const context = canvas.getContext("2d");
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return canvas.toDataURL("image/png");
-}
-
-// .doc 形式でエクスポートする処理
-document.getElementById("exportWordBtn").addEventListener("click", () => {
-  const imageElements = document.querySelectorAll(".thumb");
-  imageElements.forEach((imageElement) => {
-    // calculateMD5(imageElement.src).then(hash => console.log(hash));
-    // 元画像を一時退避して大きさの再調整ができるようにしている
-    stush.push(imageElement.src);
-    imageElement.src = resizeImage(imageElement, 1.0);
-  });
-  const preHtml =
-    "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>" +
-    document.getElementById("header").innerText + "</title></head><body>";
-  const postHtml = "</body></html>";
-  const pElement = document.createElement("p");
-  pElement.innerText = "&nbsp";
-  const html = preHtml +
-    document.getElementById("header").innerText +
-    pElement.innerText +
-    document.getElementById("imageList").innerHTML +
-    postHtml;
-
-  // Specify link url
-  const url = "data:application/vnd.ms-word;charset=utf-8," +
-    encodeURIComponent(html);
-
-  // Specify file name
-  let filename = window.prompt(
-    "ファイル名を入力してください",
-    "photobook.doc",
-  );
-  if (filename == null || filename == "") {
-    filename = "photobook.doc";
+    target.parentNode.insertBefore(dragged, isUpper ? target : target.nextSibling);
+    target.style.borderTop = "";
+    target.style.borderBottom = "";
   }
 
-  // Create download link element
-  const downloadLink = document.createElement("a");
-  document.body.appendChild(downloadLink);
-  downloadLink.style = "display: none";
-  downloadLink.href = url;
-  downloadLink.download = filename;
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-  imageElements.forEach((imageElement) => {
-    // 一時退避した元画像を戻す
-    imageElement.src = stush.shift();
-    // calculateMD5(imageElement.src).then(hash => console.log(hash));
-  });
-});
+  onImageListDblClick(event) {
+    if (event.target.classList.contains("imageCaption")) {
+      const newName = prompt("変更後のファイル名を入力してください", event.target.innerText);
+      if (newName != null) event.target.innerText = newName;
 
-// 画像を一時退避するための変数のクロージャ
-function stushImages() {
-  let images = [];
-  return {
-    all: function () {
-      return images;
-    },
-    push: function (image) {
-      images.push(image);
-    },
-    pop: function () {
-      return images.pop();
-    },
-    unshift: function (image) {
-      images.unshift(image);
-    },
-    shift: function () {
-      return images.shift();
-    },
-    empty: function () {
-      for (let i = 0; i <= images.length; i++) {
-        images.splice(0);
+    } else if (event.target.classList.contains("thumb")) {
+      event.target.parentNode.remove();
+      if (!this.imageList.querySelector(".thumb")) {
+        this.clearImages();
       }
-    },
-  };
+    }
+  }
+
+  onImageWidthChange(event) {
+    const w = `${event.target.value}px`;
+    this.imageList.querySelectorAll(".thumb").forEach((img) => {
+      img.style.width = w;
+    });
+  }
+
+  clearImages() {
+    this.imageList.innerHTML = "";
+    this.fileSelector.value = "";
+    this.deleteFileBtn.disabled = true;
+    this.exportWordBtn.disabled = true;
+    this.printBtn.disabled = true;
+    this.tempStack.clear();
+  }
+
+  async handleExportWord() {
+    const images = Array.from(this.imageList.querySelectorAll(".thumb"));
+    images.forEach((img) => {
+      this.tempStack.push(img.src);
+      img.src = this.resizeImage(img, 1.0);
+    });
+
+    const title = this.header.innerText;
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:w="urn:schemas-microsoft-com:office:word"
+            xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="utf-8"><title>${title}</title></head>
+        <body>${title}<p>&nbsp;</p>${this.imageList.innerHTML}</body>
+      </html>`.trim();
+
+    const blob = new Blob([html], { type: "application/vnd.ms-word;charset=utf-8" });
+    let filename = prompt("ファイル名を入力してください", "photobook.doc") || "photobook.doc";
+    const url = URL.createObjectURL(blob);
+    this.createDownloadLink(blob, filename);
+
+    images.forEach((img) => {
+      img.src = this.tempStack.shift();
+    });
+  }
+
+  async handleExportExcel() {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('sheet1');
+    const title = this.header.innerText;
+    worksheet.getCell('A1').value = title;
+
+    const images = Array.from(this.imageList.querySelectorAll(".thumb"));
+    images.forEach((img) => {
+      this.tempStack.push(img.src);
+      let resizedImage = this.resizeImage(img, 1.0);
+      console.table(img.clientWidth, img.clientHeight);
+      let imageId = workbook.addImage({
+        base64: resizedImage,
+        extension: 'png',
+      })
+    });
+
+
+    const uint8Array = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const filename = prompt("ファイル名を入力してください", "photobook.xlsx") || "photobook.xlsx";
+    this.createDownloadLink(blob, filename);
+
+    images.forEach((img) => {
+      img.src = this.tempStack.shift();
+    });
+  }
+
+  handleBeforePrint() {
+    this.imageList.querySelectorAll(".thumb").forEach((img) => {
+      this.tempStack.push(img.src);
+      img.src = this.resizeImage(img, 2.0);
+    });
+  }
+
+  handleAfterPrint() {
+    this.imageList.querySelectorAll(".thumb").forEach((img) => {
+      img.src = this.tempStack.shift();
+    });
+  }
+
+  resizeImage(image, ratio) {
+    const canvas = document.createElement("canvas");
+    canvas.width = image.clientWidth * ratio;
+    canvas.height = image.clientHeight * ratio;
+    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/png");
+  }
+
+  createDownloadLink(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.style.display = 'none';
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+  }
 }
-const stush = stushImages();
 
-window.addEventListener("beforeprint", () => {
-  const imageElements = document.querySelectorAll(".thumb");
-  imageElements.forEach((imageElement) => {
-    // calculateMD5(imageElement.src).then(hash => console.log(hash));
-    // 元画像を一時退避して大きさの再調整ができるようにしている
-    stush.push(imageElement.src);
-    // 表示サイズで縮小すると画像が荒すぎるので、表示サイズの2倍に縮小している。
-    imageElement.src = resizeImage(imageElement, 2.0);
-  });
-});
+new PhotoBookApp();
 
-window.addEventListener("afterprint", () => {
-  const imageElements = document.querySelectorAll(".thumb");
-  imageElements.forEach((imageElement) => {
-    // 一時退避した元画像を戻す
-    imageElement.src = stush.shift();
-    // calculateMD5(imageElement.src).then(hash => console.log(hash));
-  });
-});
 
-async function calculateMD5(input) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
