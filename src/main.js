@@ -57,6 +57,7 @@ class PhotoBookApp {
     this.imageList.addEventListener("dblclick", (e) => this.onImageListDblClick(e));
     this.headerText.addEventListener("input", (e) => (this.header.innerText = e.target.value));
     this.imageWidthInput.addEventListener("input", (e) => this.onImageWidthChange(e));
+    this.imageWidthInput.addEventListener("change", (e) => this.onImageWidthChange(e));
     this.deleteFileBtn.addEventListener("click", () => this.clearImages());
     this.printBtn.addEventListener("click", () => window.print());
     this.exportWordBtn.addEventListener("click", () => this.handleExportWord());
@@ -100,6 +101,7 @@ class PhotoBookApp {
       const img = document.createElement("img");
       img.className = "thumb";
       img.src = dataUrl;
+      img.dataset.fileName = name.replace(/\.[^/.]+$/, "");
       img.style.width = `${this.imageWidthInput.value}px`;
 
       const span = document.createElement("span");
@@ -167,6 +169,7 @@ class PhotoBookApp {
       const newName = prompt("変更後のファイル名を入力してください", event.target.innerText);
       if (newName != null) event.target.innerText = newName;
 
+      event.target.previousElementSibling.dataset.fileName = newName;
     } else if (event.target.classList.contains("thumb")) {
       event.target.parentNode.remove();
       if (!this.imageList.querySelector(".thumb")) {
@@ -176,10 +179,18 @@ class PhotoBookApp {
   }
 
   onImageWidthChange(event) {
-    const w = `${event.target.value}px`;
-    this.imageList.querySelectorAll(".thumb").forEach((img) => {
-      img.style.width = w;
-    });
+    let width = `${event.target.value}px`;
+    if (event.target.value >= 100) {
+      this.imageList.querySelectorAll(".thumb").forEach((img) => {
+        img.style.width = width;
+      });
+    } else if (event.target.value === '' && event.type === 'change') {
+      width = '360px'
+      this.imageList.querySelectorAll(".thumb").forEach((img) => {
+        img.style.width = width;
+      });
+      this.imageWidthInput.value = '360';
+    }
   }
 
   clearImages() {
