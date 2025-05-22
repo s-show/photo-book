@@ -76,143 +76,9 @@ details[open] summary:after {
   font-size: 1em;
 }
 
-/* #addFileBtn { */
-/*   vertical-align: middle; */
-/*   padding-left: 2em; */
-/*   padding-right: 2em; */
-/*   padding-top: 1em; */
-/*   padding-bottom: 1em; */
-/*   border: 2px solid #3d83ff; */
-/*   border-radius: 100vh; */
-/*   background: #3d83ff; */
-/*   color: white; */
-/*   font-weight: 600; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #addFileBtn:hover { */
-/*   cursor: pointer; */
-/*   box-shadow: 3px 3px 3px 1px gray; */
-/* } */
-/**/
-/* #addFileBtn:focus { */
-/*   box-shadow: 3px 3px 3px 1px gray; */
-/* } */
-/**/
-/* #addFileBtn:active { */
-/*   margin-top: 2px; */
-/*   margin-bottom: -2px; */
-/*   box-shadow: 1px 1px 1px gray; */
-/* } */
-/**/
 #fileSelector {
   display: none;
 }
-/**/
-/* #deleteFileBtn { */
-/*   vertical-align: middle; */
-/*   padding-left: 2em; */
-/*   padding-right: 2em; */
-/*   padding-top: 1em; */
-/*   padding-bottom: 1em; */
-/*   margin-left: 1em; */
-/*   border: 2px solid #df4042; */
-/*   border-radius: 100vh; */
-/*   background: #df4042; */
-/*   color: white; */
-/*   font-weight: 600; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #deleteFileBtn:hover { */
-/*   cursor: pointer; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #deleteFileBtn:focus { */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #deleteFileBtn:active { */
-/*   margin-top: 2px; */
-/*   margin-bottom: -2px; */
-/*   box-shadow: 1px 1px 1px gray; */
-/* } */
-/**/
-/* #deleteFileBtn:disabled { */
-/*   background: #f3b0b4; */
-/*   border: 2px solid #df4042; */
-/*   color: gray; */
-/*   cursor: not-allowed; */
-/* } */
-/**/
-/* #exportWordBtn { */
-/*   vertical-align: middle; */
-/*   padding-left: 2em; */
-/*   padding-right: 2em; */
-/*   padding-top: 1em; */
-/*   padding-bottom: 1em; */
-/*   margin-left: 1em; */
-/*   border: 0; */
-/*   border: 2px solid #ffc720; */
-/*   border-radius: 100vh; */
-/*   background: #ffc600; */
-/*   color: gray; */
-/*   font-weight: 600; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #exportWordBtn:hover { */
-/*   cursor: pointer; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #exportWordBtn:focus { */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #exportWordBtn:active { */
-/*   margin-top: 2px; */
-/*   margin-bottom: -2px; */
-/*   box-shadow: 1px 1px 1px gray; */
-/* } */
-/**/
-/* #exportWordBtn:disabled { */
-/*   background: #ffe998; */
-/*   border: 2px solid #ffc720; */
-/*   color: gray; */
-/*   cursor: not-allowed; */
-/* } */
-/**/
-/* #printBtn { */
-/*   vertical-align: middle; */
-/*   padding-left: 2em; */
-/*   padding-right: 2em; */
-/*   padding-top: 1em; */
-/*   padding-bottom: 1em; */
-/*   margin-left: 1em; */
-/*   border: 2px solid #aec6cf; */
-/*   border-radius: 100vh; */
-/*   background: #aec6cf; */
-/*   color: white; */
-/*   font-weight: 600; */
-/*   box-shadow: 3px 3px 3px gray; */
-/* } */
-/**/
-/* #printBtn:hover { */
-/*   cursor: pointer; */
-/*   box-shadow: 3px 3px 3px 1px gray; */
-/* } */
-/**/
-/* #printBtn:focus { */
-/*   box-shadow: 3px 3px 3px 1px gray; */
-/* } */
-/**/
-/* #printBtn:active { */
-/*   margin-top: 2px; */
-/*   margin-bottom: -2px; */
-/*   box-shadow: 1px 1px 1px gray; */
-/* } */
 
 #imageWidth {
   height: 1.5em;
@@ -406,7 +272,6 @@ details[open] summary:after {
   background-color: #545b62;
 }
 
-
 /* SVGアイコン共通のスタイル */
 .action-button .btn-icon {
   width: 1.2em;
@@ -425,14 +290,46 @@ details[open] summary:after {
   /* テキストの行の高さを調整 */
 }
 
+/* 無効状態のボタンスタイル */
+.action-button.disabled {
+  background-color: #e9ecef;
+  /* 背景を非常に薄いグレーに (元のボタン色より薄く) */
+  color: #adb5bd;
+  /* テキストとアイコンの色を薄く */
+  cursor: not-allowed;
+  /* カーソルを変更 */
+  box-shadow: none;
+  /* 影を削除 */
+  transform: none;
+  /* トランスフォームをリセット */
+  pointer-events: none;
+  /* クリックなどのポインターイベントを無効化 */
+}
 
+/* 個別のボタンの無効時の背景色 (より薄い色を指定) */
+/* Word青の薄い色 */
+.word-button.disabled {
+  background-color: #a9c2e8;
+  color: #ffffff;
+}
 
+/* Excel緑の薄い色 */
+.excel-button.disabled {
+  background-color: #9fd3b3;
+  color: #ffffff;
+}
 
+/* 削除赤の薄い色 */
+.image-delete-button.disabled {
+  background-color: #f5c6cb;
+  color: #ffffff;
+}
 
-
-
-
-
+/* 印刷グレーの薄い色 */
+.print-button.disabled {
+  background-color: #ced4da;
+  color: #ffffff;
+}
 
 @keyframes spinner {
   0% {

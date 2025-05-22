@@ -77,6 +77,10 @@ class PhotoBookApp {
       const imageFiles = await Promise.all(files.map(readFileAsDataURL));
       imageFiles.sort((a, b) => a.name.localeCompare(b.name));
       this.createImageList(imageFiles);
+      this.deleteFileBtn.classList.remove('disabled');
+      this.exportWordBtn.classList.remove('disabled');
+      this.exportExcelBtn.classList.remove('disabled');
+      this.printBtn.classList.remove('disabled');
     } catch (err) {
       console.error(err);
     } finally {
@@ -181,9 +185,10 @@ class PhotoBookApp {
   clearImages() {
     this.imageList.innerHTML = "";
     this.fileSelector.value = "";
-    this.deleteFileBtn.disabled = true;
-    this.exportWordBtn.disabled = true;
-    this.printBtn.disabled = true;
+    this.deleteFileBtn.classList.add('disabled');
+    this.exportWordBtn.classList.add('disabled');
+    this.exportExcelBtn.classList.add('disabled');
+    this.printBtn.classList.add('disabled');
     this.tempStack.clear();
   }
 
