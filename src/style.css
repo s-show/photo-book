@@ -29,38 +29,106 @@ hr {
   margin-top: 1em;
 }
 
-details {
+.accordion-container {
   width: 50%;
-  padding: 0.5rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  border: 2px solid #27acd9;
+  margin-top: 20px;
+  border-radius: 8px;
+  /* 角を丸く */
+  border: solid 1px #696969;
+  overflow: hidden;
+  /* 子要素のはみ出しを制御 */
 }
 
-details summary {
-  width: 100%;
-  padding: 0.5rem 0;
-  position: relative;
+details {
+  border-bottom: 1px solid #e0e0e0;
+  /* 区切り線 */
+}
+
+details:last-child {
+  border-bottom: none;
+  /* 最後の要素の区切り線はなし */
+}
+
+summary {
+  font-weight: 500;
+  /* 少し太字に */
+  font-size: 1.1em;
+  /* 文字サイズを少し大きく */
+  padding: 10px 15px;
+  /* パディングを調整 */
   cursor: pointer;
   list-style: none;
+  /* デフォルトのマーカーを非表示 */
+  display: flex;
+  /* Flexboxを使用してアイコンを配置 */
+  justify-content: space-between;
+  /* タイトルとアイコンを両端に配置 */
+  align-items: center;
+  /*垂直方向中央揃え*/
+  transition: background-color 0.3s ease;
+  /* 背景色のトランジション */
+  background-color: #add8e6;
+  /* サマリーの背景色 */
 }
 
-details summary:after {
-  content: "+";
-  color: black;
-  position: absolute;
-  font-size: 1.75rem;
-  line-height: 0;
-  margin-top: 0.75rem;
-  right: 0;
-  transform-origin: center;
-  transition: 200ms linear;
+summary:hover {
+  background-color: #87cefa;
+  /* ホバー時の背景色 */
 }
 
-details[open] summary:after {
-  transform: rotate(45deg);
-  padding: 0.5rem 0 0 0;
-  font-size: 1.75em;
+summary::-webkit-details-marker {
+  display: none;
+  /* Chrome/Safariのデフォルトマーカーを非表示 */
+}
+
+summary::after {
+  content: '+';
+  /* 閉じた状態のアイコン */
+  font-size: 1.5em;
+  /* アイコンサイズ */
+  font-weight: bold;
+  color: #555;
+  transition: transform 0.3s ease;
+  /* アイコンの回転アニメーション */
+}
+
+details[open] summary::after {
+  content: '−';
+  /* 開いた状態のアイコン */
+  transform: rotate(180deg);
+  /* アイコンを回転 (マイナス記号なので回転は不要かも) */
+}
+
+details[open] summary {
+  background-color: #87cefa;
+  /* 開いたときのサマリー背景色 */
+}
+
+
+.accordion-content {
+  padding: 15px 25px 20px;
+  /* コンテンツのパディング */
+  border-top: 1px solid #e0e0e0;
+  /* サマリーとの間に線を引く */
+  background-color: #fff;
+  /* コンテンツエリアの背景色 */
+  line-height: 1.6;
+  /* 行間を調整 */
+}
+
+.accordion-content ul {
+  margin: 0;
+  padding-left: 20px;
+  /* リストの左パディング */
+}
+
+.accordion-content li {
+  margin-bottom: 8px;
+  /* リストアイテム間のマージン */
+}
+
+.accordion-content li:last-child {
+  margin-bottom: 0;
 }
 
 #headerTextLabel,
