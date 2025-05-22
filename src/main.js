@@ -168,7 +168,6 @@ class PhotoBookApp {
     if (event.target.classList.contains("imageCaption")) {
       const newName = prompt("変更後のファイル名を入力してください", event.target.innerText);
       if (newName != null) event.target.innerText = newName;
-
       event.target.previousElementSibling.dataset.fileName = newName;
     } else if (event.target.classList.contains("thumb")) {
       event.target.parentNode.remove();
@@ -233,28 +232,57 @@ class PhotoBookApp {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('sheet1');
     const title = this.header.innerText;
+    worksheet.pageSetup = {
+      // 上下左右の余白とヘッダー・フッターの位置を全て指定しないとExcelファイルが壊れる
+      margins: {
+        left: 1.0, right: 1.0,
+        top: 1.0, bottom: 1.0,
+        header: 0.3, footer: 0.3
+      },
+      orientation: 'portrait',
+      paperSize: 9, // A4
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0, // 0を指定すると「自動」になる
+      printTitlesRow: '1:1',
+    };
     worksheet.getCell('A1').value = title;
+    worksheet.getCell('A1').font = {
+      size: 14,
+    };
+    let rowIndex = 2;
 
     const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     images.forEach((img) => {
-      this.tempStack.push(img.src);
-      let resizedImage = this.resizeImage(img, 1.0);
-      console.table(img.clientWidth, img.clientHeight);
-      let imageId = workbook.addImage({
-        base64: resizedImage,
+      const imageId = workbook.addImage({
+        base64: this.resizeImage(img, 1.0),
         extension: 'png',
       })
+      worksheet.addImage(imageId, {
+        tl: { col: 0, row: rowIndex },
+        ext: { width: img.clientWidth, height: img.clientHeight }
+      })
+      worksheet.getColumn('A').width = img.clientWidth / 7;
+      worksheet.getRow(rowIndex + 1).height = img.clientHeight * 1.40;
+      worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
+      worksheet.getCell(`B${rowIndex + 1}`).alignment = {
+        vertical: 'top',
+        wrapText: true,
+      };
+      rowIndex += 2;
     });
-
 
     const uint8Array = await workbook.xlsx.writeBuffer();
     const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    const filename = prompt("ファイル名を入力してください", "photobook.xlsx") || "photobook.xlsx";
+    let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
+    if (filename === null) {
+      console.info('filename is null.')
+      return
+    } else if (filename === '') {
+      console.info('filename is void.')
+      filename = 'photobook.xlsx';
+    }
     this.createDownloadLink(blob, filename);
-
-    images.forEach((img) => {
-      img.src = this.tempStack.shift();
-    });
   }
 
   handleBeforePrint() {
