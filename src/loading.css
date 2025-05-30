@@ -1,0 +1,43 @@
+.loadingWrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  opacity: 0.25;
+  position: fixed;
+  top: 8px;
+  left: 8px;
+}
+
+.loading {
+  margin: auto;
+  border: 20px solid gold;
+  border-radius: 50%;
+  border-top: 20px solid dodgerblue;
+  width: 1vw;
+  height: 1vw;
+  animation: spinner 4s linear infinite;
+  position: absolute;
+  top: calc(50% - 300px);
+  left: calc(50% - 26px);
+  background-color: white;
+  opacity: 1.0;
+  z-index: 999;
+}
+
+.loadingMessage {
+  display: none;
+  position: absolute;
+  top: calc(50% - 240px);
+  left: calc(50% - 48px);
+  text-align: center;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

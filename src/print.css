@@ -1,0 +1,57 @@
+@media print {
+  body {
+    width: 210mm;
+  }
+
+  hr {
+    display: none;
+  }
+
+  .header {
+    display: block;
+    margin-top: 10mm;
+    margin-bottom: 5mm;
+  }
+
+  #header {
+    width: 100%;
+    text-align: center;
+    position: fixed;
+    font-size: x-large;
+  }
+
+  li,
+  #informationDiv,
+  .iconArrowDiv {
+    display: none;
+  }
+
+  .imageDiv {
+    padding-top: 20mm;
+    padding-left: 25mm;
+    padding-right: 20mm;
+    break-inside: avoid;
+    margin: 0;
+    border: none;
+    background-color: white;
+  }
+
+  .thumb {
+    height: auto;
+  }
+
+  .imageCaption {
+    padding-right: 10mm;
+    background-color: white;
+    margin-right: 0;
+  }
+
+  #imageList.twoColumn .imageCaption {
+    text-align: center;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

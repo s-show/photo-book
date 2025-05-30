@@ -1,3 +1,8 @@
+import './style.css'
+import './menu.css'
+import './help.css'
+import './loading.css'
+import './print.css'
 import * as ExcelJS from 'exceljs';
 
 // ファイルを DataURL として読み込むヘルパー
@@ -42,6 +47,10 @@ class PhotoBookApp {
     this.loadingMessage = document.getElementById("loadingMessage");
     this.content = document.getElementById("content");
     this.loading = document.getElementById("loading");
+    this.openHelpBtn = document.getElementById('helpIcon');
+    this.closeHelpBtn = document.getElementById('closeSidebar');
+    this.helpSidebar = document.getElementById('helpSidebar');
+    this.columnToggleBtn = document.getElementById('columnToggleBtn')
 
     this.tempStack = new TempImageStack();
     this.bindEvents();
@@ -62,6 +71,10 @@ class PhotoBookApp {
     this.printBtn.addEventListener("click", () => window.print());
     this.exportWordBtn.addEventListener("click", () => this.handleExportWord());
     this.exportExcelBtn.addEventListener("click", () => this.handleExportExcel());
+    this.openHelpBtn.addEventListener('click', () => this.openHelp());
+    this.closeHelpBtn.addEventListener('click', () => this.closeHelp());
+    this.columnToggleBtn.addEventListener('change', (e) => this.changeColumnNuber(e));
+    document.addEventListener('click', (e) => this.clickPage(e));
     window.addEventListener("beforeprint", () => this.handleBeforePrint());
     window.addEventListener("afterprint", () => this.handleAfterPrint());
   }
@@ -286,6 +299,7 @@ class PhotoBookApp {
   }
 
   handleBeforePrint() {
+    document.getElementById('header').innerText = document.getElementById('headerText').value;
     this.imageList.querySelectorAll(".thumb").forEach((img) => {
       this.tempStack.push(img.src);
       img.src = this.resizeImage(img, 2.0);
@@ -306,6 +320,15 @@ class PhotoBookApp {
     return canvas.toDataURL("image/png");
   }
 
+  changeColumnNuber(event) {
+    const imageList = document.getElementById('imageList');
+    if (event.target.checked) {
+      imageList.classList.add('twoColumn');
+    } else {
+      imageList.classList.remove('twoColumn');
+    }
+  }
+
   createDownloadLink(blob, filename) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -316,10 +339,25 @@ class PhotoBookApp {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
   }
+
+  openHelp() {
+    document.getElementById('helpSidebar').classList.toggle('active');
+  }
+
+  closeHelp() {
+    document.getElementById('helpSidebar').classList.remove('active');
+  }
+
+  clickPage(event) {
+    if (!this.helpSidebar.contains(event.target) &&
+      !this.openHelpBtn.contains(event.target) &&
+      this.helpSidebar.classList.contains('active')) {
+      this.helpSidebar.classList.remove('active')
+    }
+  }
+
 }
 
 new PhotoBookApp();
-
 

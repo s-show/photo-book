@@ -1,0 +1,350 @@
+$icon-width: 18px;
+$icon-color: black;
+
+// Button colors
+$word-button-color: #2b579a;
+$word-button-hover-color: #1f3d70;
+$word-button-active-color: #1a335c;
+
+$excel-button-color: #1D6F42;
+$excel-button-hover-color: #165934;
+$excel-button-active-color: #0F4025;
+
+$image-load-button-color: #007bff;
+$image-load-button-hover-color: #0056b3;
+$image-load-button-active-color: #004085;
+
+$image-delete-button-color: #dc3545;
+$image-delete-button-hover-color: #c82333;
+$image-delete-button-active-color: #bd2130;
+
+$print-button-color: #6c757d;
+$print-button-hover-color: #5a6268;
+$print-button-active-color: #545b62;
+
+// Shared styles
+@mixin margin-vertical($top: 0.75em, $bottom: 0.2em) {
+  margin-top: $top;
+  margin-bottom: $bottom;
+}
+
+@mixin action-button ($bg-color, $hover-color, $active-color, $disabled-color) {
+  background-color: $bg-color;
+  color: white;
+
+  &:hover {
+    background-color: $hover-color;
+  }
+
+  &:active {
+    background-color: $active-color;
+  }
+
+  &.disabled {
+    background-color: $disabled-color;
+    color: #adb5bd;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    pointer-events: none;
+  }
+}
+
+// Reset styles
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --icon-width: $icon-width;
+  --icon-color: $icon-color;
+}
+
+p, ul, label, input {
+  @include margin-vertical();
+}
+
+hr {
+  margin-top: 1em;
+}
+
+.header, .loadingMessage {
+  display: none;
+}
+
+// Form elements
+#headerText, #imageWidth {
+  height: 1.5em;
+  margin-top: 0.1em;
+  font-size: 1em;
+
+  &#headerText {
+    width: 25%;
+  }
+
+  &#imageWidth {
+    width: 10%;
+  }
+}
+
+#progressCount {
+  @include margin-vertical(1em, 0.2em);
+}
+
+#fileSelector {
+  display: none;
+}
+
+#imageList {
+  margin-top: 1em;
+}
+
+.header {
+  font-size: 1.5em;
+}
+
+// Image styles
+.imageDiv {
+  display: flex;
+  margin-top: 10mm;
+  border: solid 1px gray;
+  background-color: lightcyan;
+  cursor: grab;
+}
+
+.thumb {
+  border: solid 1px gray;
+  height: auto;
+}
+
+.imageCaption {
+  vertical-align: top;
+  margin-left: 1em;
+  margin-right: 10em;
+  background-color: whitesmoke;
+}
+
+// Loader styles
+.loadingWrapper {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: 100vw;
+  height: 100vh;
+  background-color: white;
+  opacity: 0.25;
+  z-index: 999;
+
+  .loading {
+    position: absolute;
+    top: calc(50% - 300px);
+    left: calc(50% - 26px);
+    width: 1vw;
+    height: 1vw;
+    border: 20px solid gold;
+    border-radius: 50%;
+    border-top: 20px solid dodgerblue;
+    animation: spinner 4s linear infinite;
+    background-color: white;
+    opacity: 1.0;
+  }
+}
+
+// Keyframes for spinner
+@keyframes spinner {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+
+// Accordion styles
+.accordion-container {
+  width: 50%;
+  margin-top: 20px;
+  border-radius: 8px;
+  border: solid 1px #696969;
+  overflow: hidden;
+
+  details {
+    border-bottom: 1px solid #e0e0e0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      font-weight: 500;
+      font-size: 1.1em;
+      cursor: pointer;
+      list-style: none;
+      background-color: #add8e6;
+      transition: background-color 0.3s ease;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &:hover {
+        background-color: #87cefa;
+      }
+
+      &::after {
+        content: '+';
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #555;
+        transition: transform 0.3s ease;
+      }
+
+      [open] & {
+        background-color: #87cefa;
+
+        &::after {
+          content: '−';
+          transform: rotate(180deg);
+        }
+      }
+    }
+
+    .accordion-content {
+      padding: 15px 25px 20px;
+      background-color: #fff;
+      border-top: 1px solid #e0e0e0;
+      line-height: 1.6;
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+
+        li {
+          margin-bottom: 8px;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Action buttons
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 28px;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  @include action-button (
+    white,
+    #e9ecef,
+    #adb5bd,
+    none,
+    none
+  );
+
+  .btn-icon {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 10px;
+    fill: currentColor;
+  }
+
+  span {
+    line-height: 1;
+  }
+}
+
+.word-button {
+  @include action-button($word-button-color, $word-button-hover-color, $word-button-active-color, #a9c2e8);
+}
+
+.excel-button {
+  @include action-button($excel-button-color, $excel-button-hover-color, $excel-button-active-color, #9fd3b3);
+}
+
+.image-load-button {
+  @include action-button($image-load-button-color, $image-load-button-hover-color, $image-load-button-active-color, #e9ecef);
+}
+
+.image-delete-button {
+  @include action-button($image-delete-button-color, $image-delete-button-hover-color, $image-delete-button-active-color, #f5c6cb);
+}
+
+.print-button {
+  @include action-button($print-button-color, $print-button-hover-color, $print-button-active-color, #ced4da);
+}
+
+// Print styles
+@media print {
+  body {
+    width: 210mm;
+  }
+
+  hr {
+    display: none;
+  }
+
+  .header {
+    display: block;
+    margin-top: 10mm;
+    margin-bottom: 5mm;
+    font-size: x-large;
+  }
+
+  #header {
+    width: 100%;
+    text-align: center;
+    position: fixed;
+  }
+
+  li, #informationDiv, .iconArrowDiv {
+    display: none;
+  }
+
+  .imageDiv {
+    padding: 20mm 25mm 0 20mm;
+    break-inside: avoid;
+    margin: 0;
+    border: none;
+    background-color: white;
+  }
+
+  .thumb {
+    width: 480px;
+    height: auto;
+  }
+
+  .imageCaption {
+    padding-right: 10mm;
+    background-color: white;
+    margin-right: 0;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}

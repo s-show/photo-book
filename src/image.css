@@ -1,6 +1,12 @@
-#headerText {
+#imageWidth {
   height: 1.5em;
+  width: 60px;
   font-size: 1em;
+}
+
+#progressCount {
+  margin-top: 1em;
+  margin-bottom: 0.2em;
 }
 
 #imageList {
@@ -9,7 +15,7 @@
 
 #imageList.twoColumn {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  flex-direction: row;
 }
 
 .header {
@@ -18,15 +24,14 @@
 }
 
 .imageDiv {
-  margin-top: 10px;
+  margin-top: 10mm;
+  border: solid 1px gray;
   background-color: lightcyan;
   cursor: grab;
-  height: auto;
-  display: flex;
-  flex-direction: row;
 }
 
-#imageList.twoColumn .imageDiv {
+.imageDiv.twoColumn {
+  display: flex;
   flex-direction: column;
 }
 
@@ -37,16 +42,13 @@
 
 .imageCaption {
   margin-left: 1em;
-  margin-right: 1em;
+  margin-right: 10em;
   background-color: whitesmoke;
-  text-wrap: pretty;
-  vertical-align: top;
 }
 
-#imageList.twoColumn .imageCaption {
+.imageCaption.twoColumn {
   margin-left: 0em;
   margin-right: 0em;
   background-color: whitesmoke;
   text-wrap: pretty;
-  background-color: white;
 }
