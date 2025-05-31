@@ -4,6 +4,8 @@ import './help.css'
 import './loading.css'
 import './print.css'
 import * as ExcelJS from 'exceljs';
+import TurndownService from 'turndown'
+import markdownDocx, { Packer, styles } from 'markdown-docx';
 
 // ファイルを DataURL として読み込むヘルパー
 function readFileAsDataURL(file) {
@@ -216,26 +218,24 @@ class PhotoBookApp {
   }
 
   async handleExportWord() {
+    this.header.innerText = this.headerText.value;
     const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     images.forEach((img) => {
       this.tempStack.push(img.src);
       img.src = this.resizeImage(img, 1.0);
     });
-
-    const title = this.header.innerText;
-    const html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office"
-            xmlns:w="urn:schemas-microsoft-com:office:word"
-            xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="utf-8"><title>${title}</title></head>
-        <body>${title}<p>&nbsp;</p>${this.imageList.innerHTML}</body>
-      </html>`.trim();
-
-    const blob = new Blob([html], { type: "application/vnd.ms-word;charset=utf-8" });
-    let filename = prompt("ファイル名を入力してください", "photobook.doc") || "photobook.doc";
-    const url = URL.createObjectURL(blob);
-    this.createDownloadLink(blob, filename);
-
+    const htmlStr = new XMLSerializer().serializeToString(document.getElementById('imageList'));
+    styles.markdown.heading1.paragraph = {
+      keepNext: false,
+      spacing: {
+        before: 0,
+        after: 0
+      }
+    }
+    const markdown = this.convertHtmlToMarkdown(htmlStr);
+    const docx = await markdownDocx(markdown);
+    const blob = await Packer.toBlob(docx);
+    this.createDownloadLink(blob, 'photobook.docx');
     images.forEach((img) => {
       img.src = this.tempStack.shift();
     });
@@ -354,6 +354,28 @@ class PhotoBookApp {
       !this.openHelpBtn.contains(event.target) &&
       this.helpSidebar.classList.contains('active')) {
       this.helpSidebar.classList.remove('active')
+    }
+  }
+
+  convertHtmlToMarkdown(htmlString) {
+    try {
+      // Initialize Turndown with custom options
+      const turndownService = new TurndownService({
+        headingStyle: 'setext',
+        codeBlockStyle: 'fenced',
+        emDelimiter: '_',
+        hr: '---',
+        bulletListMarker: '-',
+        strongDelimiter: '**',
+      });
+      // Remove scripts, styles, and other unwanted elements
+      turndownService.remove(['script', 'style', 'noscript', 'iframe']);
+      // Convert the HTML to Markdown
+      const markdown = turndownService.turndown(htmlString);
+      return markdown;
+    } catch (error) {
+      console.error('Error converting HTML to Markdown:', error);
+      return '';
     }
   }
 
