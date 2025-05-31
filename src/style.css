@@ -39,7 +39,8 @@
   margin-left: 1em;
   margin-right: 1em;
   background-color: whitesmoke;
-  text-wrap: pretty;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
   vertical-align: top;
 }
 
@@ -47,6 +48,7 @@
   margin-left: 0em;
   margin-right: 0em;
   background-color: whitesmoke;
-  text-wrap: pretty;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
   background-color: white;
 }

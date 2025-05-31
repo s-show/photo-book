@@ -116,13 +116,13 @@ class PhotoBookApp {
       const img = document.createElement("img");
       img.className = "thumb";
       img.src = dataUrl;
-      img.dataset.fileName = name.replace(/\.[^/.]+$/, "");
+      img.dataset.fileName = name;
       img.style.width = `${this.imageWidthInput.value}px`;
 
       const span = document.createElement("span");
       span.className = "imageCaption";
       span.id = `${name}_Span`;
-      span.innerText = name.replace(/\.[^/.]+$/, "");
+      span.innerText = name;
 
       div.appendChild(img);
       div.appendChild(span);
@@ -235,7 +235,15 @@ class PhotoBookApp {
     const markdown = this.convertHtmlToMarkdown(htmlStr);
     const docx = await markdownDocx(markdown);
     const blob = await Packer.toBlob(docx);
-    this.createDownloadLink(blob, 'photobook.docx');
+    let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
+    if (filename === null) {
+      console.info('filename is null.')
+      return
+    } else if (filename === '') {
+      console.info('filename is void.')
+      filename = 'photobook.xlsx';
+    }
+    this.createDownloadLink(blob, filename);
     images.forEach((img) => {
       img.src = this.tempStack.shift();
     });
@@ -244,7 +252,7 @@ class PhotoBookApp {
   async handleExportExcel() {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('sheet1');
-    const title = this.header.innerText;
+    const title = this.headerText.value;
     worksheet.pageSetup = {
       // 上下左右の余白とヘッダー・フッターの位置を全て指定しないとExcelファイルが壊れる
       margins: {
@@ -264,6 +272,7 @@ class PhotoBookApp {
       size: 14,
     };
     let rowIndex = 2;
+    let colIndex = 0;
 
     const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     images.forEach((img) => {
@@ -271,18 +280,56 @@ class PhotoBookApp {
         base64: this.resizeImage(img, 1.0),
         extension: 'png',
       })
-      worksheet.addImage(imageId, {
-        tl: { col: 0, row: rowIndex },
-        ext: { width: img.clientWidth, height: img.clientHeight }
-      })
-      worksheet.getColumn('A').width = img.clientWidth / 7;
-      worksheet.getRow(rowIndex + 1).height = img.clientHeight * 1.40;
-      worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
-      worksheet.getCell(`B${rowIndex + 1}`).alignment = {
-        vertical: 'top',
-        wrapText: true,
-      };
-      rowIndex += 2;
+      if (this.columnToggleBtn.checked) {
+        if (colIndex === 0) {
+          worksheet.addImage(imageId, {
+            tl: { col: colIndex, row: rowIndex },
+            ext: {
+              width: img.clientWidth,
+              height: img.clientHeight
+            }
+          })
+          worksheet.getColumn('A').width = img.clientWidth / 7;
+          worksheet.getRow(rowIndex + 1).height = img.clientHeight;
+          worksheet.getCell(`A${rowIndex + 2}`).value = img.dataset.fileName;
+          worksheet.getCell(`A${rowIndex + 2}`).alignment = {
+            vertical: 'top',
+            wrapText: true,
+          };
+          colIndex = 2;
+        } else {
+          worksheet.addImage(imageId, {
+            tl: { col: colIndex, row: rowIndex },
+            ext: {
+              width: img.clientWidth,
+              height: img.clientHeight
+            }
+          })
+          worksheet.getColumn('C').width = img.clientWidth / 7;
+          const rowHeight = worksheet.getRow(rowIndex + 1).height;
+          worksheet.getRow(rowIndex + 1).height = rowHeight < img.clientHeight ? img.clientHeight : rowHeight;
+          worksheet.getCell(`C${rowIndex + 2}`).value = img.dataset.fileName;
+          worksheet.getCell(`C${rowIndex + 2}`).alignment = {
+            vertical: 'top',
+            wrapText: true,
+          };
+          colIndex = 0;
+          rowIndex += 2;
+        }
+      } else {
+        worksheet.addImage(imageId, {
+          tl: { col: 0, row: rowIndex },
+          ext: { width: img.clientWidth, height: img.clientHeight }
+        })
+        worksheet.getColumn('A').width = img.clientWidth / 7;
+        worksheet.getRow(rowIndex + 1).height = img.clientHeight;
+        worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
+        worksheet.getCell(`B${rowIndex + 1}`).alignment = {
+          vertical: 'top',
+          wrapText: true,
+        };
+        rowIndex += 2;
+      }
     });
 
     const uint8Array = await workbook.xlsx.writeBuffer();
@@ -299,11 +346,12 @@ class PhotoBookApp {
   }
 
   handleBeforePrint() {
-    document.getElementById('header').innerText = document.getElementById('headerText').value;
+    this.header.innerText = this.headerText.value;
     this.imageList.querySelectorAll(".thumb").forEach((img) => {
       this.tempStack.push(img.src);
-      img.src = this.resizeImage(img, 2.0);
+      img.src = this.resizeImage(img, 1.0);
     });
+    document.documentElement.style.setProperty('--headerText', `"${this.headerText.value}"`)
   }
 
   handleAfterPrint() {
