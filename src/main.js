@@ -235,13 +235,13 @@ class PhotoBookApp {
     const markdown = this.convertHtmlToMarkdown(htmlStr);
     const docx = await markdownDocx(markdown);
     const blob = await Packer.toBlob(docx);
-    let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
+    let filename = prompt("ファイル名を入力してください", "photobook.docx");
     if (filename === null) {
       console.info('filename is null.')
       return
     } else if (filename === '') {
       console.info('filename is void.')
-      filename = 'photobook.xlsx';
+      filename = 'photobook.docx';
     }
     this.createDownloadLink(blob, filename);
     images.forEach((img) => {
