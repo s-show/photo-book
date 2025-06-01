@@ -45,10 +45,9 @@ class PhotoBookApp {
     this.printBtn = document.getElementById("printBtn");
     this.headerText = document.getElementById("headerTextInput");
     this.header = document.getElementById("header");
-    this.loadingMessage = document.getElementById("loadingMessage");
     this.imageWidthInput = document.getElementById("imageWidthInput");
     this.content = document.getElementById("content");
-    this.loading = document.getElementById("loading");
+    this.loadingOverlay = document.getElementById("loadingOverlay");
     this.openHelpBtn = document.getElementById('helpIcon');
     this.closeHelpBtn = document.getElementById('closeSidebar');
     this.helpSidebar = document.getElementById('helpSidebar');
@@ -77,6 +76,7 @@ class PhotoBookApp {
     this.closeHelpBtn.addEventListener('click', () => this.closeHelp());
     this.columnToggleBtn.addEventListener('change', (e) => this.changeColumnNuber(e));
     document.addEventListener('click', (e) => this.clickPage(e));
+    window.addEventListener("load", () => this.finishLoading())
     window.addEventListener("beforeprint", () => this.handleBeforePrint());
     window.addEventListener("afterprint", () => this.handleAfterPrint());
   }
@@ -88,7 +88,7 @@ class PhotoBookApp {
       return;
     }
 
-    this.toggleLoading(true);
+    this.startLoading('画像読み込み中');
     try {
       const imageFiles = await Promise.all(files.map(readFileAsDataURL));
       imageFiles.sort((a, b) => a.name.localeCompare(b.name));
@@ -100,7 +100,7 @@ class PhotoBookApp {
     } catch (err) {
       console.error(err);
     } finally {
-      this.toggleLoading(false);
+      this.finishLoading();
     }
   }
 
@@ -136,10 +136,17 @@ class PhotoBookApp {
     this.printBtn.disabled = false;
   }
 
-  toggleLoading(active) {
-    this.content.classList.toggle("loadingWrapper", active);
-    this.loading.classList.toggle("loading", active);
-    this.loadingMessage.style.display = active ? "block" : "none";
+  startLoading(message = 'loading') {
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+    document.getElementById('loadingSpinner').classList.remove('hidden');
+    document.getElementById('loadingMessage').classList.remove('hidden');
+    document.getElementById('loadingMessage').innerText = message;
+  }
+
+  finishLoading() {
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('loadingSpinner').classList.add('hidden');
+    document.getElementById('loadingMessage').classList.add('hidden');
   }
 
   onDragStart(event) {
