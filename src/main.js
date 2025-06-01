@@ -1,8 +1,8 @@
-import './style.css'
-import './menu.css'
-import './help.css'
-import './loading.css'
-import './print.css'
+import './style.scss'
+// import './menu.css'
+// import './help.css'
+// import './loading.css'
+// import './print.css'
 import * as ExcelJS from 'exceljs';
 import TurndownService from 'turndown'
 import markdownDocx, { Packer, styles } from 'markdown-docx';

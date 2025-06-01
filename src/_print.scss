@@ -1,0 +1,23 @@
+@media print {
+  body {
+    width: 210mm;
+  }
+
+  hr {
+    display: none;
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm;
+
+    @top-center {
+      content: var(--headerText, "photo-book");
+      margin-top: 10px;
+      font-size: 16pt;
+    }
+    @bottom-center {
+      content: counter(page) "/"  counter(pages);
+    }
+  }
+}

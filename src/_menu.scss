@@ -1,0 +1,285 @@
+#menuDiv {
+  margin-left: 200px;
+  margin-right: 200px;
+  width: 1000px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+
+  >* {
+    flex: 1 1 130px;
+  }
+}
+
+.inputDiv {
+  margin-top: 10px;
+}
+
+/* トグルスイッチのコンテナ */
+.toggle-switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+
+  span {
+    font-size: 0.875rem;
+    /* text-sm */
+    font-weight: 500;
+    /* font-medium */
+    color: #374151;
+    /* text-gray-700 */
+    margin-left: 0.1rem;
+    /* space-x-3 */
+    margin-right: 0.15rem;
+    /* space-x-3 */
+    font-size: 1em;
+  }
+}
+
+/* 非表示のチェックボックス */
+.hidden-checkbox {
+  display: none;
+
+  &:focus+.toggle-label {
+    /* focus-within:ring-4 focus-within:ring-blue-300 */
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+    /* ring-blue-300 with opacity */
+  }
+
+  /* チェックされた時のスタイル */
+  &:checked+.toggle-label {
+    background-color: white;
+    /* peer-checked:bg-blue-500 */
+
+    .toggle-knob {
+      transform: translateX(1.7rem);
+    }
+  }
+}
+
+/* トグルスイッチのラベル（トラック） */
+.toggle-label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 1.75rem;
+  /* h-7 */
+  width: 3.5rem;
+  /* w-14 */
+  border-radius: 9999px;
+  /* rounded-full */
+  cursor: pointer;
+  background-color: white;
+  /* bg-gray-300 */
+  transition: background-color 0.3s ease-in-out;
+  border: 1px solid #a9a9a9;
+}
+
+/* トグルスイッチのつまみ */
+.toggle-knob {
+  position: absolute;
+  left: 0.15rem;
+  /* left-1 */
+  top: 0.25rem;
+  /* top-1 */
+  display: inline-block;
+  height: 1.25rem;
+  /* h-5 */
+  width: 1.25rem;
+  /* w-5 */
+  background-color: black;
+  border-radius: 9999px;
+  /* rounded-full */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  /* shadow */
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+#fileSelector {
+  display: none;
+}
+
+/* ダウンロード/アクションボタン共通スタイル */
+.action-button {
+  display: inline-flex;
+  /* アイコンとテキストをインラインで横並びにする */
+  align-items: center;
+  /* アイコンとテキストを垂直方向に中央揃え */
+  padding: 14px 28px;
+  color: #ffffff;
+  text-decoration: none;
+  /* リンクの下線を削除 */
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  /* アニメーション効果 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  white-space: nowrap;
+  /* テキストが折り返さないようにする */
+
+  &.disabled .btn-icon {
+    /* 無効時のアイコンの色もテキストに合わせる */
+    fill: currentColor;
+  }
+
+  /* ボタン共通のマウスオーバー時のスタイル */
+  &:hover {
+    transform: translateY(-2px);
+    /* ボタンを少し上に移動させる */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    /* 影を少し濃くする */
+  }
+
+  /* ボタン共通のクリック時（アクティブ時）のスタイル */
+  &:active {
+    transform: translateY(0);
+    /* ボタンの位置を元に戻す */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* 影を少し薄くする */
+  }
+
+  /* SVGアイコン共通のスタイル */
+  .btn-icon {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 10px;
+    fill: currentColor;
+    /* アイコンの色をテキストの色に合わせる (白) */
+  }
+
+  /* テキスト部分のスタイル */
+  span {
+    line-height: 1;
+  }
+
+  /* 無効状態のボタンスタイル */
+  &.disabled {
+    background-color: #e9ecef;
+    color: #adb5bd;
+    cursor: not-allowed;
+    box-shadow: none;
+    /* 影を削除 */
+    transform: none;
+    /* トランスフォームをリセット */
+    pointer-events: none;
+    /* クリックなどのポインターイベントを無効化 */
+  }
+}
+
+/* Wordボタン特有のスタイル */
+.word-button {
+  /* Wordのブランドカラーに近い青色 */
+  background-color: #2b579a;
+
+  &:hover {
+    background-color: #1f3d70;
+  }
+
+  &:active {
+    background-color: #1a335c;
+  }
+
+  &.disabled {
+    /* Word青の薄い色 */
+    background-color: #a9c2e8;
+    color: #ffffff;
+  }
+}
+
+/* Excelボタン特有のスタイル */
+.excel-button {
+  /* Excelのブランドカラーに近い緑色 */
+  background-color: #1D6F42;
+
+  &:hover {
+    background-color: #165934;
+  }
+
+  &:active {
+    background-color: #0F4025;
+  }
+
+  &.disabled {
+    /* Excel緑の薄い色 */
+    background-color: #9fd3b3;
+    color: #ffffff;
+  }
+}
+
+/* 画像読み込みボタン特有のスタイル */
+.image-load-button {
+  background-color: #007bff;
+  /* 明るい青 */
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:active {
+    background-color: #004085;
+  }
+}
+
+/* 画像削除ボタン特有のスタイル */
+.image-delete-button {
+  background-color: #dc3545;
+
+  &:hover {
+    background-color: #c82333;
+  }
+
+  &:active {
+    background-color: #bd2130;
+  }
+
+  &.disabled {
+    /* 削除赤の薄い色 */
+    background-color: #f5c6cb;
+    color: #ffffff;
+  }
+}
+
+/* 印刷ボタン特有のスタイル */
+.print-button {
+  background-color: #6c757d;
+
+  &:hover {
+    background-color: #5a6268;
+  }
+
+  &:active {
+    background-color: #545b62;
+  }
+
+  &.disabled {
+    /* 印刷グレーの薄い色 */
+    background-color: #ced4da;
+    color: #ffffff;
+  }
+}
+
+/* 画像の幅を指定する <input> */
+#imageWidthInput {
+  height: 1.5em;
+  width: 60px;
+  font-size: 1em;
+}
+
+/* タイトルを指定する <input> */
+#headerTextInput {
+  height: 1.5em;
+  font-size: 1em;
+}
+
+#informationDiv {
+  @media print {
+    display: none;
+  }
+}

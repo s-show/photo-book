@@ -1,0 +1,82 @@
+#imageWidth {
+  height: 1.5em;
+  width: 60px;
+  font-size: 1em;
+}
+
+#progressCount {
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+}
+
+#imageList {
+  margin-top: 1em;
+
+  @media print {
+    margin-top: 0px;
+  }
+
+  &.twoColumn {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    .imageCaption {
+      margin-left: 0em;
+      margin-right: 0em;
+      background-color: whitesmoke;
+      text-wrap: wrap;
+      overflow-wrap: anywhere;
+      background-color: white;
+
+      @media print {
+        text-align: center;
+      }
+    }
+
+    .imageDiv {
+      flex-direction: column;
+    }
+  }
+}
+
+.header {
+  display: none;
+  font-size: 1.5em;
+}
+
+.imageDiv {
+  margin-top: 10px;
+  background-color: lightcyan;
+  cursor: grab;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+
+  @media print {
+    padding-top: 10px;
+    break-inside: avoid;
+    margin: 0;
+    border: none;
+    background-color: white;
+  }
+}
+
+.thumb {
+  border: solid 1px gray;
+  height: auto;
+}
+
+.imageCaption {
+  margin-left: 1em;
+  margin-right: 1em;
+  background-color: whitesmoke;
+  text-wrap: wrap;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+
+  @media print {
+    padding-right: 10mm;
+    background-color: white;
+    margin-right: 0;
+  }
+}
