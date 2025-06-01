@@ -43,10 +43,10 @@ class PhotoBookApp {
     this.exportWordBtn = document.getElementById("exportWordBtn");
     this.exportExcelBtn = document.getElementById("exportExcelBtn");
     this.printBtn = document.getElementById("printBtn");
-    this.headerText = document.getElementById("headerText");
+    this.headerText = document.getElementById("headerTextInput");
     this.header = document.getElementById("header");
-    this.imageWidthInput = document.getElementById("imageWidth");
     this.loadingMessage = document.getElementById("loadingMessage");
+    this.imageWidthInput = document.getElementById("imageWidthInput");
     this.content = document.getElementById("content");
     this.loading = document.getElementById("loading");
     this.openHelpBtn = document.getElementById('helpIcon');
@@ -218,6 +218,9 @@ class PhotoBookApp {
   }
 
   async handleExportWord() {
+    if (this.columnToggleBtn.checked) {
+      window.alert('Word形式で出力する際、段組みは反映されません。');
+    }
     this.header.innerText = this.headerText.value;
     const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     images.forEach((img) => {
