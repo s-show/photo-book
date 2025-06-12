@@ -1,8 +1,4 @@
 import './style.scss'
-// import './menu.css'
-// import './help.css'
-// import './loading.css'
-// import './print.css'
 import * as ExcelJS from 'exceljs';
 import TurndownService from 'turndown'
 import markdownDocx, { Packer, styles } from 'markdown-docx';
@@ -300,12 +296,19 @@ class PhotoBookApp {
             }
           })
           worksheet.getColumn('A').width = img.clientWidth / 7;
-          worksheet.getRow(rowIndex + 1).height = img.clientHeight;
-          worksheet.getCell(`A${rowIndex + 2}`).value = img.dataset.fileName;
-          worksheet.getCell(`A${rowIndex + 2}`).alignment = {
-            vertical: 'top',
+          // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
+          worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 + 10;
+          worksheet.getCell(`A${rowIndex + 1}`).value = img.dataset.fileName;
+          worksheet.getCell(`A${rowIndex + 1}`).alignment = {
+            vertical: 'bottom',
             wrapText: true,
           };
+          worksheet.getCell(`A${rowIndex + 1}`).border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          }
           colIndex = 2;
         } else {
           worksheet.addImage(imageId, {
@@ -317,12 +320,19 @@ class PhotoBookApp {
           })
           worksheet.getColumn('C').width = img.clientWidth / 7;
           const rowHeight = worksheet.getRow(rowIndex + 1).height;
-          worksheet.getRow(rowIndex + 1).height = rowHeight < img.clientHeight ? img.clientHeight : rowHeight;
-          worksheet.getCell(`C${rowIndex + 2}`).value = img.dataset.fileName;
-          worksheet.getCell(`C${rowIndex + 2}`).alignment = {
-            vertical: 'top',
+          // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
+          worksheet.getRow(rowIndex + 1).height = rowHeight < img.clientHeight ? img.clientHeight * 0.845 + 10 : rowHeight;
+          worksheet.getCell(`C${rowIndex + 1}`).value = img.dataset.fileName;
+          worksheet.getCell(`C${rowIndex + 1}`).alignment = {
+            vertical: 'bottom',
             wrapText: true,
           };
+          worksheet.getCell(`C${rowIndex + 1}`).border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          }
           colIndex = 0;
           rowIndex += 2;
         }
@@ -332,7 +342,7 @@ class PhotoBookApp {
           ext: { width: img.clientWidth, height: img.clientHeight }
         })
         worksheet.getColumn('A').width = img.clientWidth / 7;
-        worksheet.getRow(rowIndex + 1).height = img.clientHeight;
+        worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 +10;
         worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
         worksheet.getCell(`B${rowIndex + 1}`).alignment = {
           vertical: 'top',
