@@ -1,18 +1,41 @@
 #menuDiv {
-  margin-left: 200px;
-  margin-right: 200px;
-  width: 1000px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: space-around;
 
   >* {
-    flex: 1 1 130px;
+    flex: 1;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    
+    >* {
+      flex: none;
+    }
+  }
+}
+
+#paramsDiv {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: end;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
   }
 }
 
 .inputDiv {
   margin-top: 10px;
+  
+  @media (max-width: 768px) {
+    margin-top: 15px;
+    text-align: center;
+  }
 }
 
 /* トグルスイッチのコンテナ */
@@ -20,7 +43,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
 
   span {
     font-size: 0.875rem;
@@ -109,7 +131,7 @@
   /* アイコンとテキストをインラインで横並びにする */
   align-items: center;
   /* アイコンとテキストを垂直方向に中央揃え */
-  padding: 14px 28px;
+  padding: 12px 12px;
   color: #ffffff;
   text-decoration: none;
   /* リンクの下線を削除 */
@@ -279,6 +301,11 @@
 }
 
 #informationDiv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
   @media print {
     display: none;
   }
