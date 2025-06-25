@@ -221,148 +221,172 @@ class PhotoBookApp {
   }
 
   async handleExportWord() {
-    if (this.columnToggleBtn.checked) {
-      window.alert('Word形式で出力する際、段組みは反映されません。');
-    }
-    this.header.innerText = this.headerText.value;
-    const images = Array.from(this.imageList.querySelectorAll(".thumb"));
-    images.forEach((img) => {
-      this.tempStack.push(img.src);
-      img.src = this.resizeImage(img, 1.0);
-    });
-    const htmlStr = new XMLSerializer().serializeToString(document.getElementById('imageList'));
-    styles.markdown.heading1.paragraph = {
-      keepNext: false,
-      spacing: {
-        before: 0,
-        after: 0
+    this.startLoading('Wordファイル作成中');
+    
+    // ローディング画面を表示させるために少し待機
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    try {
+      if (this.columnToggleBtn.checked) {
+        window.alert('Word形式で出力する際、段組みは反映されません。');
       }
+      this.header.innerText = this.headerText.value;
+      const images = Array.from(this.imageList.querySelectorAll(".thumb"));
+      images.forEach((img) => {
+        this.tempStack.push(img.src);
+        img.src = this.resizeImage(img, 1.0);
+      });
+      const htmlStr = new XMLSerializer().serializeToString(document.getElementById('imageList'));
+      styles.markdown.heading1.paragraph = {
+        keepNext: false,
+        spacing: {
+          before: 0,
+          after: 0
+        }
+      }
+      const markdown = this.convertHtmlToMarkdown(htmlStr);
+      const docx = await markdownDocx(markdown);
+      const blob = await Packer.toBlob(docx);
+      let filename = prompt("ファイル名を入力してください", "photobook.docx");
+      if (filename === null) {
+        console.info('filename is null.')
+        return
+      } else if (filename === '') {
+        console.info('filename is void.')
+        filename = 'photobook.docx';
+      }
+      this.createDownloadLink(blob, filename);
+      images.forEach((img) => {
+        img.src = this.tempStack.shift();
+      });
+    } catch (error) {
+      console.error('Word export failed:', error);
+      alert('Wordファイルの作成に失敗しました。');
+    } finally {
+      this.finishLoading();
     }
-    const markdown = this.convertHtmlToMarkdown(htmlStr);
-    const docx = await markdownDocx(markdown);
-    const blob = await Packer.toBlob(docx);
-    let filename = prompt("ファイル名を入力してください", "photobook.docx");
-    if (filename === null) {
-      console.info('filename is null.')
-      return
-    } else if (filename === '') {
-      console.info('filename is void.')
-      filename = 'photobook.docx';
-    }
-    this.createDownloadLink(blob, filename);
-    images.forEach((img) => {
-      img.src = this.tempStack.shift();
-    });
   }
 
   async handleExportExcel() {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('sheet1');
-    const title = this.headerText.value;
-    worksheet.pageSetup = {
-      // 上下左右の余白とヘッダー・フッターの位置を全て指定しないとExcelファイルが壊れる
-      margins: {
-        left: 1.0, right: 1.0,
-        top: 1.0, bottom: 1.0,
-        header: 0.3, footer: 0.3
-      },
-      orientation: 'portrait',
-      paperSize: 9, // A4
-      fitToPage: true,
-      fitToWidth: 1,
-      fitToHeight: 0, // 0を指定すると「自動」になる
-      printTitlesRow: '1:1',
-    };
-    worksheet.getCell('A1').value = title;
-    worksheet.getCell('A1').font = {
-      size: 14,
-    };
-    let rowIndex = 2;
-    let colIndex = 0;
+    this.startLoading('Excelファイル作成中');
+    
+    // ローディング画面を表示させるために少し待機
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('sheet1');
+      const title = this.headerText.value;
+      worksheet.pageSetup = {
+        // 上下左右の余白とヘッダー・フッターの位置を全て指定しないとExcelファイルが壊れる
+        margins: {
+          left: 1.0, right: 1.0,
+          top: 1.0, bottom: 1.0,
+          header: 0.3, footer: 0.3
+        },
+        orientation: 'portrait',
+        paperSize: 9, // A4
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 0, // 0を指定すると「自動」になる
+        printTitlesRow: '1:1',
+      };
+      worksheet.getCell('A1').value = title;
+      worksheet.getCell('A1').font = {
+        size: 14,
+      };
+      let rowIndex = 2;
+      let colIndex = 0;
 
-    const images = Array.from(this.imageList.querySelectorAll(".thumb"));
-    images.forEach((img) => {
-      const imageId = workbook.addImage({
-        base64: this.resizeImage(img, 1.0),
-        extension: 'png',
-      })
-      if (this.columnToggleBtn.checked) {
-        if (colIndex === 0) {
-          worksheet.addImage(imageId, {
-            tl: { col: colIndex, row: rowIndex },
-            ext: {
-              width: img.clientWidth,
-              height: img.clientHeight
+      const images = Array.from(this.imageList.querySelectorAll(".thumb"));
+      images.forEach((img) => {
+        const imageId = workbook.addImage({
+          base64: this.resizeImage(img, 1.0),
+          extension: 'png',
+        })
+        if (this.columnToggleBtn.checked) {
+          if (colIndex === 0) {
+            worksheet.addImage(imageId, {
+              tl: { col: colIndex, row: rowIndex },
+              ext: {
+                width: img.clientWidth,
+                height: img.clientHeight
+              }
+            })
+            worksheet.getColumn('A').width = img.clientWidth / 7;
+            // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
+            worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 + 10;
+            worksheet.getCell(`A${rowIndex + 1}`).value = img.dataset.fileName;
+            worksheet.getCell(`A${rowIndex + 1}`).alignment = {
+              vertical: 'bottom',
+              wrapText: true,
+            };
+            worksheet.getCell(`A${rowIndex + 1}`).border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
             }
-          })
-          worksheet.getColumn('A').width = img.clientWidth / 7;
-          // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
-          worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 + 10;
-          worksheet.getCell(`A${rowIndex + 1}`).value = img.dataset.fileName;
-          worksheet.getCell(`A${rowIndex + 1}`).alignment = {
-            vertical: 'bottom',
-            wrapText: true,
-          };
-          worksheet.getCell(`A${rowIndex + 1}`).border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
+            colIndex = 2;
+          } else {
+            worksheet.addImage(imageId, {
+              tl: { col: colIndex, row: rowIndex },
+              ext: {
+                width: img.clientWidth,
+                height: img.clientHeight
+              }
+            })
+            worksheet.getColumn('C').width = img.clientWidth / 7;
+            const rowHeight = worksheet.getRow(rowIndex + 1).height;
+            // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
+            worksheet.getRow(rowIndex + 1).height = rowHeight < img.clientHeight ? img.clientHeight * 0.845 + 10 : rowHeight;
+            worksheet.getCell(`C${rowIndex + 1}`).value = img.dataset.fileName;
+            worksheet.getCell(`C${rowIndex + 1}`).alignment = {
+              vertical: 'bottom',
+              wrapText: true,
+            };
+            worksheet.getCell(`C${rowIndex + 1}`).border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' }
+            }
+            colIndex = 0;
+            rowIndex += 2;
           }
-          colIndex = 2;
         } else {
           worksheet.addImage(imageId, {
-            tl: { col: colIndex, row: rowIndex },
-            ext: {
-              width: img.clientWidth,
-              height: img.clientHeight
-            }
+            tl: { col: 0, row: rowIndex },
+            ext: { width: img.clientWidth, height: img.clientHeight }
           })
-          worksheet.getColumn('C').width = img.clientWidth / 7;
-          const rowHeight = worksheet.getRow(rowIndex + 1).height;
-          // 高さの算定式は、画像のサイズとExcelでちょうど良い高さを比較して求めたもの。
-          worksheet.getRow(rowIndex + 1).height = rowHeight < img.clientHeight ? img.clientHeight * 0.845 + 10 : rowHeight;
-          worksheet.getCell(`C${rowIndex + 1}`).value = img.dataset.fileName;
-          worksheet.getCell(`C${rowIndex + 1}`).alignment = {
-            vertical: 'bottom',
+          worksheet.getColumn('A').width = img.clientWidth / 7;
+          worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 +10;
+          worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
+          worksheet.getCell(`B${rowIndex + 1}`).alignment = {
+            vertical: 'top',
             wrapText: true,
           };
-          worksheet.getCell(`C${rowIndex + 1}`).border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          }
-          colIndex = 0;
           rowIndex += 2;
         }
-      } else {
-        worksheet.addImage(imageId, {
-          tl: { col: 0, row: rowIndex },
-          ext: { width: img.clientWidth, height: img.clientHeight }
-        })
-        worksheet.getColumn('A').width = img.clientWidth / 7;
-        worksheet.getRow(rowIndex + 1).height = img.clientHeight * 0.845 +10;
-        worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
-        worksheet.getCell(`B${rowIndex + 1}`).alignment = {
-          vertical: 'top',
-          wrapText: true,
-        };
-        rowIndex += 2;
-      }
-    });
+      });
 
-    const uint8Array = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
-    if (filename === null) {
-      console.info('filename is null.')
-      return
-    } else if (filename === '') {
-      console.info('filename is void.')
-      filename = 'photobook.xlsx';
+      const uint8Array = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
+      if (filename === null) {
+        console.info('filename is null.')
+        return
+      } else if (filename === '') {
+        console.info('filename is void.')
+        filename = 'photobook.xlsx';
+      }
+      this.createDownloadLink(blob, filename);
+    } catch (error) {
+      console.error('Excel export failed:', error);
+      alert('Excelファイルの作成に失敗しました。');
+    } finally {
+      this.finishLoading();
     }
-    this.createDownloadLink(blob, filename);
   }
 
   handleBeforePrint() {

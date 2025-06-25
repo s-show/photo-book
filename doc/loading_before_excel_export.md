@@ -22,10 +22,18 @@
 
 ### 2. 実装
 
-- [ ] B: handleExportExcel()メソッドの開始時にstartLoading('Excelファイル作成中')を追加
-- [ ] C: handleExportExcel()メソッドの終了時（成功・失敗両方）にfinishLoading()を追加
+- [x] B: handleExportExcel()メソッドの開始時にstartLoading('Excelファイル作成中')を追加
+- [x] C: handleExportExcel()メソッドの終了時（成功・失敗両方）にfinishLoading()を追加
 
 ### 3. テスト
 
-- [ ] D: 実装をテストして動作確認 
+- [x] D: 実装をテストして動作確認
+
+## 実装詳細
+
+handleExportExcel()メソッドに以下の変更を行いました：
+1. メソッド開始時に`this.startLoading('Excelファイル作成中')`を追加
+2. ローディング画面を確実に表示するため、100ms の待機時間を追加
+3. try-catch-finallyブロックでエラーハンドリングを追加
+4. finallyブロックで`this.finishLoading()`を呼び出し、成功・失敗に関わらずローディング画面を非表示にする 
 
