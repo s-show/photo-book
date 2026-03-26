@@ -42,12 +42,12 @@ jobs:
           Single-file HTML application built from commit ${{ github.sha }}
           
           ### Usage
-          1. Download `index.html`
-          2. Open in your web browser
-          3. Upload images and create your photo book
+          1. `index.html` をダウンロードする
+          2. `index.html` をブラウザで開く
+          3. 写真帖にしたい写真を開く
           
           ### Changes
-          See commit history for detailed changes.
+          `CHANGE.md` を見てください
         draft: false
         prerelease: false
       env:
