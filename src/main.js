@@ -276,6 +276,12 @@ class PhotoBookApp {
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet('sheet1');
+      const printAreaHeightMm = 241;
+      let rowIndex = 1;
+      let colIndex = 1;
+      let printArea = printAreaHeightMm;
+      let leftSideRowCount = 1;
+      let leftSideImgHeight = 1;
       const title = this.headerText.value;
       worksheet.pageSetup = {
         // 上下左右の余白とヘッダー・フッターの位置を全て指定しないとExcelファイルが壊れる
@@ -289,135 +295,204 @@ class PhotoBookApp {
         fitToPage: true,
         fitToWidth: 1,
         fitToHeight: 0, // 0を指定すると「自動」になる
-        printTitlesRow: '1:1',
+        printTitlesRow: '1:2',
       };
-      worksheet.getCell('A1').value = title;
-      worksheet.getCell('A1').font = {
+      worksheet.getCell(rowIndex, colIndex).value = title;
+      worksheet.getCell(rowIndex, colIndex).font = {
         size: 14,
       };
+      rowIndex += 2;
+      // 奇数ページと偶数ページの両方に同じ設定をしないとフッターが表示されない
+      worksheet.headerFooter.oddFooter = "&P / &N ページ";
+      worksheet.headerFooter.evenFooter = "&P / &N ページ";
       worksheet.properties.defaultRowHeight = 15;
-      let rowIndex = 2;
-      let colIndex = 0;
-      let printArea = 241;
 
       const images = Array.from(this.imageList.querySelectorAll(".thumb"));
-      images.forEach((img, index, array) => {
-        // 現在の画像が単独で印刷可能範囲より高い場合
-        if (this.getImageRowHeightMm(img.clientHeight) > 241) {
-          window.alert(`${img.dataset.fileName} は Excel の1ページの印刷可能範囲を超えていますので出力しません。`)
-        } else {
-          const imageId = workbook.addImage({
-            base64: this.resizeImage(img, 1.0),
-            extension: 'png',
-          })
-          const currentRow = worksheet.getRow(rowIndex + 1);
-          const currentCell = currentRow.getCell(colIndex + 1);
-          const imgWidth = img.clientWidth;
-          const imgHeight = img.clientHeight;
-          if (this.columnToggleBtn.checked) {
-            worksheet.addImage(imageId, {
-              tl: { col: colIndex, row: rowIndex },
-              ext: {
-                width: imgWidth,
-                height: imgHeight
-              }
-            })
-            worksheet.getColumn(colIndex + 1).width = imgWidth / 7;
-            currentCell.value = img.dataset.fileName;
-            currentCell.alignment = {
-              vertical: 'bottom',
-              wrapText: true,
-            };
-            currentCell.border = {
-              top: { style: 'thin' },
-              left: { style: 'thin' },
-              bottom: { style: 'thin' },
-              right: { style: 'thin' }
-            }
-            if (colIndex === 0) {
-              currentRow.height = this.getImageRowHeightPoint(imgHeight)
-              colIndex = 2;
-            } else {
-              const rowHeight = currentRow.height;
-              currentRow.height =
-                rowHeight < this.getImageRowHeightPoint(imgHeight)
-                  ? this.getImageRowHeightPoint(imgHeight)
-                  : rowHeight;
-              colIndex = 0;
-              rowIndex += 2;
-            }
-          } else {
-            printArea -= this.getImageRowHeightMm(imgHeight) + this.getDefaultRowHeightMm();
-            console.table({
-              'filename': img.dataset.fileName,
-              'imgHeight': imgHeight,
-              'imgRowHeightMm': this.getImageRowHeightMm(imgHeight),
-              'imgRowHeightPoint': this.getImageRowHeightPoint(imgHeight),
-              'printArea': printArea
-            });
+      const filterdImages = images.filter(img => {
+        return printAreaHeightMm - this.pxToMm(img.clientHeight) - this.ptToMm(15) > 0
+      });
+      const removedImages = images.filter(img => {
+        return printAreaHeightMm - this.pxToMm(img.clientHeight) - this.ptToMm(15) < 0
+      });
+      removedImages.forEach(img => window.alert(`${img.dataset.fileName} は Excel の1ページの印刷可能範囲を超えていますので出力しません。`))
+      filterdImages.forEach((img, index, array) => {
+        // 現在の画像が単独で印刷可能範囲に収まらない場合
+        // if (this.getImageRowHeightMm(img.clientHeight) > printAreaHeightMm) {
+        //   window.alert(`${img.dataset.fileName} は Excel の1ページの印刷可能範囲を超えていますので出力しません。`)
+        //   return
+        // } else {
+        const imgWidth = img.clientWidth;
+        const imgHeight = img.clientHeight;
+        const imgFileName = img.dataset.fileName;
+        const nextImgHeight = index < array.length - 1 ? array[index + 1].clientHeight : 0;
 
+        const imageId = workbook.addImage({
+          base64: this.resizeImage(img, 1.0),
+          extension: 'png',
+        })
+        worksheet.addImage(imageId, {
+          tl: {
+            col: colIndex - 1 + 0.1,
+            row: rowIndex + 0.1,
+          },
+          ext: {
+            width: imgWidth,
+            height: imgHeight
+          },
+          editAs: 'undefined',
+        })
+
+        // 2列表示の場合の処理
+        if (this.columnToggleBtn.checked) {
+          const needRowCount = Math.ceil(imgHeight / 16);
+          console.table({
+            'filename': img.dataset.fileName,
+            'imgHeight': imgHeight,
+            'imgHeightMm': this.pxToMm(imgHeight),
+            'printArea': printArea,
+            'needRowCount': needRowCount,
+          });
+
+          const fileNameCell = worksheet.getCell(rowIndex, colIndex);
+          fileNameCell.value = imgFileName;
+          fileNameCell.alignment = { shrinkToFit: true };
+          fileNameCell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            right: { style: 'thin' }
+          }
+          worksheet.getColumn(colIndex).width = imgWidth / 6.5;
+          worksheet.mergeCells(
+            rowIndex + 1,
+            colIndex,
+            rowIndex + needRowCount,
+            colIndex
+          )
+          worksheet.getCell(rowIndex + 1, colIndex).border = {
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          }
+          if (colIndex === 1) {
+            leftSideRowCount = needRowCount;
+            leftSideImgHeight = imgHeight;
             // 次の画像の高さに応じて改ページを挿入する処理
             // 最後の画像では不要な処理なので、最後の画像の1つ手前で処理を分岐している。
             if (index < array.length - 1) {
-              // 次の画像は単独だと印刷可能範囲に収まる
-              if (this.pixelToMm(array[index + 1].clientHeight) < 241) {
-                // 次の画像が残りの印刷可能範囲に収まらない場合
-                if (printArea - this.getImageRowHeightMm(array[index + 1].clientHeight) < 0) {
-                  // 現在の画像の高さが行の高さの限界より高い場合
-                  if (this.isExceedingRowHeightLimit(imgHeight)) {
-                    const [needRowCount] = this.computeRowMergeParams(imgHeight);
-                    console.log({ needRowCount })
-                    worksheet.getRow(rowIndex + needRowCount).addPageBreak();
-                  } else {
-                    worksheet.getRow(rowIndex + 1).addPageBreak();
-                  }
-                  printArea = 241
+              // 次の画像は単独だと印刷可能範囲に収まる（空行とファイル名の行の高さを考慮する）
+              if (printAreaHeightMm - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) > 0) {
+                // 次の画像が残りの印刷可能範囲に収まらない（空行とファイル名の行の高さを考慮する）
+                if (printArea - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) < 0) {
+                  worksheet.getRow(rowIndex + needRowCount).addPageBreak();
+                  // 空行を追加するために `+1` している
+                  rowIndex += needRowCount + 1;
+                  colIndex = 1;
+                  printArea = printAreaHeightMm;
+                } else {
+                  colIndex = 3;
                 }
               }
             }
-            worksheet.addImage(imageId, {
-              // 画像の上端をセルの上端に合わせると、画像の上端が前のページにはみ出すことがあるので、
-              // 画像の位置をセルの上端からちょっと下にずらしている。
-              tl: {
-                col: 0,
-                row: rowIndex + 0.1,
-              },
-              ext: {
-                width: imgWidth,
-                height: imgHeight
-              },
-            })
-            worksheet.getColumn('A').width = imgWidth / 7;
-            worksheet.getCell(`B${rowIndex + 1}`).value = img.dataset.fileName;
-            worksheet.getCell(`B${rowIndex + 1}`).alignment = {
-              vertical: 'top',
-              wrapText: true,
-            };
-            if (this.isExceedingRowHeightLimit(imgHeight)) {
-              console.log('size over!')
-              const [needRowCount, cellHeightPoint] = this.computeRowMergeParams(imgHeight);
-              worksheet.getRows(rowIndex + 1, needRowCount - 1).forEach((row) => {
-                row.height = this.getRowHeightLimitPoint();
-              })
-              worksheet.getRow(rowIndex + needRowCount).height = cellHeightPoint;
-              rowIndex += (2 + needRowCount - 1);
+          } else {
+            // 右側の列の処理
+            if (imgHeight > leftSideImgHeight) {
+              printArea -= this.pxToMm(imgHeight);
             } else {
-              console.log('size ok')
-              worksheet.getRow(rowIndex + 1).height = this.getImageRowHeightPoint(imgHeight);
-              rowIndex += 2;
+              printArea -= this.pxToMm(leftSideImgHeight);
+            }
+            // 次の画像の高さに応じて改ページを挿入する処理
+            // 最後の画像では不要な処理なので、最後の画像の1つ手前で処理を分岐している。
+            if (index < array.length - 1) {
+              // 次の画像は単独だと印刷可能範囲に収まる（空行とファイル名の行の高さを考慮する）
+              if (printAreaHeightMm - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) > 0) {
+                // 次の画像が残りの印刷可能範囲に収まらない（空行とファイル名の行の高さを考慮する）
+                if (printArea - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) < 0) {
+                  if (needRowCount > leftSideRowCount) {
+                    worksheet.getRow(rowIndex + needRowCount).addPageBreak();
+                    rowIndex += needRowCount + 2;
+                  } else {
+                    worksheet.getRow(rowIndex + leftSideRowCount).addPageBreak();
+                    rowIndex += leftSideRowCount + 2;
+                  }
+                  printArea = printAreaHeightMm;
+                } else {
+                  if (needRowCount > leftSideRowCount) {
+                    rowIndex += needRowCount + 2;
+                  } else {
+                    rowIndex += leftSideRowCount + 2;
+                  }
+                }
+                colIndex = 1;
+              }
             }
           }
+        } else {
+          // 1列表示の場合の処理
+          const needRowCount = Math.ceil(imgHeight / 16);
+          // printArea -= (this.pxToMm(imgHeight) + this.ptToMm(15 * 1));
+          printArea -= this.ptToMm(Math.ceil(imgHeight / 16) * 15);
+          console.table({
+            'filename': img.dataset.fileName,
+            'imgHeight': imgHeight,
+            'nextImgHeight': nextImgHeight,
+            'pxToMm': this.pxToMm(imgHeight) + this.ptToMm(15),
+            'ptToMm': this.ptToMm(Math.ceil(imgHeight) / 16 * 15),
+            'printArea': printArea,
+            'needRowCount': needRowCount,
+          });
+
+          // 次の画像の高さに応じて改ページを挿入する処理
+          // 最後の画像では不要な処理なので、最後の画像の1つ手前で処理を分岐している。
+          if (index < array.length - 1) {
+            // 次の画像は単独だと印刷可能範囲に収まる（空行とファイル名の行の高さを考慮する）
+            if (printAreaHeightMm - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) > 0) {
+              // 次の画像が残りの印刷可能範囲に収まらない場合（空行とファイル名の行の高さを考慮する）
+              if (printArea - this.ptToMm(Math.ceil(nextImgHeight / 16) * 15) < 0) {
+                worksheet.getRow(rowIndex + needRowCount).addPageBreak();
+                printArea = printAreaHeightMm;
+              }
+            }
+          }
+          worksheet.getColumn(colIndex).width = imgWidth / 6.5;
+          worksheet.mergeCells(
+            rowIndex,
+            colIndex,
+            rowIndex + needRowCount,
+            colIndex
+          )
+          worksheet.getCell(rowIndex, colIndex).border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          }
+          worksheet.getCell(rowIndex, colIndex + 1).value = imgFileName;
+          worksheet.getCell(rowIndex, colIndex + 1).alignment = {
+            vertical: 'top',
+            wrapText: true,
+          };
+          worksheet.getColumn(colIndex + 1).width = 15;
+          worksheet.mergeCells(
+            rowIndex,
+            colIndex + 1,
+            rowIndex + (this.pxToPt(imgHeight) / 15) - 1,
+            colIndex + 1
+          )
+          rowIndex += needRowCount + 2;
         }
+        // }
       });
 
       const uint8Array = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([uint8Array], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const blob = new Blob([uint8Array], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
       let filename = prompt("ファイル名を入力してください", "photobook.xlsx");
       if (filename === null) {
-        console.info('filename is null.')
+        console.error('filename is null.')
         return
       } else if (filename === '') {
-        console.info('filename is void.')
+        console.error('filename is void.')
         filename = 'photobook.xlsx';
       }
       this.createDownloadLink(blob, filename);
@@ -512,27 +587,11 @@ class PhotoBookApp {
   }
 
   /**
-   * Excel の行の高さの限界（409pt）を返す 
-   * @returns {number}
-   */
-  getRowHeightLimitPoint() {
-    return 409
-  }
-
-  /**
-   * Excel の行の高さの限界（545px）を返す 
-   * @returns {number}
-   */
-  getRowHeightLimitPixel() {
-    return 545
-  }
-
-  /**
    * ピクセルを Excel の行の高さのポイントに変換する
    * @param {number} pixel - image height.
    * @returns {number}
    */
-  pixelToPoint(pixel) {
+  pxToPt(pixel) {
     return Number(pixel * 0.75)
   }
 
@@ -541,7 +600,7 @@ class PhotoBookApp {
    * @param {number} pixel - image height.
    * @returns {number}
    */
-  pixelToMm(pixel) {
+  pxToMm(pixel) {
     return Number(pixel * 0.265)
   }
 
@@ -550,7 +609,7 @@ class PhotoBookApp {
    * @param {number} pixel - image height.
    * @returns {number}
    */
-  pointToMm(pixel) {
+  ptToMm(pixel) {
     return Number(pixel * 0.35)
   }
 
@@ -560,56 +619,10 @@ class PhotoBookApp {
    * @returns {number}
    */
   getImageRowHeightMm(height) {
-    return Number(this.pointToMm(height / 1.2))
-  }
-
-  /**
-   * 画像をセットするために必要な行の高さを返す（ポイント単位）
-   * @param {number} height - image height(px).
-   * @returns {number}
-   */
-  getImageRowHeightPoint(height) {
-    if (height < 50) {
-      return Number(Math.ceil(height / 1.1))
-    } else if (height < 100) {
-      return Number(Math.ceil(height / 1.15))
-    } else {
-      return Number(Math.ceil(height / 1.2))
-    }
-  }
-
-  /**
-   * Excel のデフォルトの行の高さ（15pt）を mm に変換した値を返す
-   * @returns {number}
-   */
-  getDefaultRowHeightMm() {
-    const defaultRowHeight = 15;
-    return Number(this.pixelToMm(defaultRowHeight));
-  }
-
-  /**
-   * 画像の高さが Excel の行の高さの限界（409pt）を超過するかチェックする
-   * @param {number} height - image height(px).
-   * @returns {boolean}
-   */
-  isExceedingRowHeightLimit(height) {
-    return this.getImageRowHeightPoint(height) < this.getRowHeightLimitPoint() ? false : true
-  }
-
-  /**
-   * Excel の行の高さの限界を超過する画像を格納するために結合すべきセルの数と最後の行の高さを返す
-   * @param {number} height - image height(px).
-   * @returns {number[]}
-   */
-  computeRowMergeParams(height) {
-    return [
-      Number(
-        Math.ceil(this.getImageRowHeightPoint(height) / this.getRowHeightLimitPoint())
-      ),
-      Number(
-        this.getImageRowHeightPoint(height) % this.getRowHeightLimitPoint()
-      )
-    ]
+    return Number(
+      // this.pxToMm(height) + this.ptToMm(15 * 2.5)
+      this.ptToMm(Math.ceil(height / 16) * 15)
+    )
   }
 
 }
