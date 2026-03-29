@@ -19,8 +19,11 @@
             emmet-ls
             typescript-language-server
             eslint_d
+            firefox
+            vscode-extensions.firefox-devtools.vscode-firefox-debug
           ];
           shellHook = ''
+            export JS_DEBUG_SERVER="${pkgs.vscode-extensions.firefox-devtools.vscode-firefox-debug}/share/vscode/extensions/firefox-devtools.vscode-firefox-debug/dist/adapter.bundle.js"
             echo "Entering custom Nix shell..."
           '';
         };

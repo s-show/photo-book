@@ -6,4 +6,7 @@ export default defineConfig({
   build: {
     minify: false
   },
+  test: {
+    globals: true,
+  },
 })

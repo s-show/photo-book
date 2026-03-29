@@ -1,3 +1,4 @@
+-- LSP 設定
 -- テストで古いバージョンの Neovim を起動したときのエラー回避
 if vim.fn.has('nvim-0.11') == 1 then
   local lsp_names = {
@@ -39,4 +40,50 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {
 vim.keymap.set("n", "<leader>l", function()
   lint.try_lint()
 end, { desc = "Trigger linting for current file" })
+
+--- dap 設定
+local dap = require("dap")
+
+-- JS_DEBUG_SERVER が未設定なら警告して終了
+local js_debug_server = vim.fn.getenv("JS_DEBUG_SERVER")
+if js_debug_server == vim.NIL or js_debug_server == "" then
+  vim.notify("[dap] JS_DEBUG_SERVER is not set. Run `nix develop` first.", vim.log.levels.WARN)
+  return
+end
+
+-- アダプタ設定
+dap.adapters.firefox = {
+  type = "executable",
+  command = "node",
+  args = { js_debug_server },
+}
+
+-- 設定
+local config = {
+  {
+    type = "firefox",
+    request = "launch",
+    name = "Launch Firefox (Vite)",
+    url = "http://localhost:5173",
+    webRoot = "${workspaceFolder}",
+    firefoxExecutable = vim.fn.exepath("firefox"),
+  },
+}
+
+dap.configurations.html = config
+dap.configurations.javascript = config
+dap.configurations.typescript = config
+
+-- プロジェクトローカルなキーマップ
+local map = function(k, f)
+  vim.keymap.set("n", k, f, { buffer = false, desc = "[dap] " .. k })
+end
+
+map("<F5>", dap.continue)
+map("<F9>", dap.toggle_breakpoint)
+map("<F10>", dap.step_over)
+map("<F11>", dap.step_into)
+map("<S-F11>", dap.step_out)
+map("<leader>ar", dap.repl.open)
+map("<leader>ax", dap.terminate)
 
