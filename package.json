@@ -10,16 +10,16 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "sass": "^1.89.0",
-    "vite": "^6.0.5",
-    "vite-plugin-singlefile": "^2.1.0",
+    "sass": "^1.101.0",
+    "vite": "^8.0.16",
+    "vite-plugin-singlefile": "^2.3.3",
     "vitest": "^3.2.6"
   },
   "dependencies": {
-    "docx": "^9.5.0",
+    "docx": "^9.7.1",
     "exceljs": "^4.4.0",
-    "markdown-docx": "^1.1.2",
-    "sass-embedded": "^1.89.1",
-    "turndown": "^7.2.0"
+    "markdown-docx": "^1.6.0",
+    "sass-embedded": "^1.100.0",
+    "turndown": "^7.2.4"
   }
 }
