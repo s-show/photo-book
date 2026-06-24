@@ -216,7 +216,9 @@ export default class PhotoBookApp {
   }
 
   clearImages() {
-    this.imageList.innerHTML = "";
+    document.querySelectorAll('.imageDiv').forEach(imageDiv => {
+      imageDiv.parentNode.removeChild((imageDiv))
+    })
     this.fileSelector.value = "";
     this.deleteFileBtn.classList.add('disabled');
     this.exportWordBtn.classList.add('disabled');
