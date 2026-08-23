@@ -16,7 +16,9 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: latest
+        # ローカル環境と major を揃えるため 10 系に固定する。
+        # `latest` にすると pnpm 11 が使われ、Node.js 22.13 以上が必要になる。
+        version: 10
         
     - name: Setup Node.js
       uses: actions/setup-node@v6
