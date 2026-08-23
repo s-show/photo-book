@@ -41,7 +41,7 @@ jobs:
         run: ./scripts/check.sh
 
       - name: Upload single-file build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: photo-book-ci-build
           path: dist/index.html
