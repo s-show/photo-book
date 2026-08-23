@@ -1,0 +1,38 @@
+version: 2
+
+updates:
+  # このリポジトリで実際に使用するecosystemだけを設定する。
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    groups:
+      # minor / patch はまとめてPR数を減らす。
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # major更新はgroupに含めない（Dependabotはgroup条件外の更新を個別PRにする）。
+    # vite / sass / exceljs / docx などのmajorは個別に変更履歴と実動作を確認する。
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
