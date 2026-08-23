@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    # job名はruleset / branch protectionから参照するため変更しない。
+    name: Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Run shared checks
+        # ローカルとCIで同じ検証ロジックを使う（lock整合性 / テスト / 本番build）。
+        run: ./scripts/check.sh
+
+      - name: Upload single-file build
+        uses: actions/upload-artifact@v4
+        with:
+          name: photo-book-ci-build
+          path: dist/index.html
+          retention-days: 7
