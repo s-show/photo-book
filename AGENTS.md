@@ -32,7 +32,7 @@ Recent history favors short, task-focused commits, including Japanese summaries 
 - Both workflows pin `pnpm/action-setup` to `version: 10` on purpose. Do not change it to `latest` or `11`: pnpm 11 requires Node.js 22.13+ while `flake.nix` pins `nodejs_20`, and it drops the v10 build-approval settings. Moving to pnpm 11 is a deliberate change that also requires updating `flake.nix`.
 - Dependency build scripts are approved through `allowBuilds` in `pnpm-workspace.yaml` (recognised by both pnpm 10.33+ and 11). Do not reintroduce `ignoredBuiltDependencies` or `onlyBuiltDependencies`, and do not run `pnpm approve-builds` to silence a failure without checking why the package needs a build script.
 - The production artifact is the single-file `dist/index.html` produced by `pnpm run build`. `./scripts/check.sh` builds it, so no separate Docker or image build is required.
-- Update lockfiles with `pnpm` commands only. Never hand-edit `pnpm-lock.yaml` or `package-lock.json`, and never regenerate a lockfile just to make a check pass.
+- `pnpm-lock.yaml` is the only lockfile. Update it with `pnpm` commands only; never hand-edit it, never regenerate it just to make a check pass, and do not add a `package-lock.json` or `yarn.lock` (a second lockfile breaks Dependabot's npm updates).
 - CI does not run a linter or formatter because none is configured. Do not introduce one as a side effect of another change.
 
 ## Data and external services
