@@ -1,8 +1,8 @@
 import './style.scss'
 import * as ExcelJS from 'exceljs';
-import { pxToMm, ptToMm, pxToPt, getImageHeightPt, mmToPt, getExportPixelWidth, getDataUrlExtension, formatDocxImageSize } from './utils.js';
-import TurndownService from 'turndown'
-import markdownDocx, { Packer, styles } from 'markdown-docx';
+import { Packer } from 'docx';
+import { pxToMm, ptToMm, pxToPt, getImageHeightPt, mmToPt, getExportPixelWidth, getDataUrlExtension } from './utils.js';
+import { createWordDocument } from './word.js';
 
 // ファイルを DataURL として読み込むヘルパー
 function readFileAsDataURL(file) {
@@ -12,22 +12,6 @@ function readFileAsDataURL(file) {
     reader.onload = () => resolve({ name: file.name, dataUrl: reader.result });
     reader.readAsDataURL(file);
   });
-}
-
-// 画像ソースを一時退避するスタック
-class TempImageStack {
-  constructor() {
-    this.images = [];
-  }
-  push(src) {
-    this.images.push(src);
-  }
-  shift() {
-    return this.images.shift();
-  }
-  clear() {
-    this.images = [];
-  }
 }
 
 export default class PhotoBookApp {
@@ -51,7 +35,6 @@ export default class PhotoBookApp {
     this.helpSidebar = document.getElementById('helpSidebar');
     this.columnToggleBtn = document.getElementById('columnToggleBtn')
 
-    this.tempStack = new TempImageStack();
     this.bindEvents();
   }
 
@@ -224,7 +207,6 @@ export default class PhotoBookApp {
     this.exportWordBtn.classList.add('disabled');
     this.exportExcelBtn.classList.add('disabled');
     this.printBtn.classList.add('disabled');
-    this.tempStack.clear();
   }
 
   async handleExportWord() {
@@ -233,31 +215,23 @@ export default class PhotoBookApp {
     // ローディング画面を表示させるために少し待機
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // 復元処理を finally で行うため try の外で宣言している
     const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     try {
       if (this.columnToggleBtn.checked) {
         window.alert('Word形式で出力する際、段組みは反映されません。');
       }
-      this.header.innerText = this.headerText.value;
       const dpi = Number(this.imageQualitySelect.value);
-      images.forEach((img) => {
-        this.tempStack.push(img.src);
-        // markdown-docx は `![alt](src "幅x高さ")` の title で docx 上のサイズを決めるため、
-        // title に表示サイズを、src に高解像度の画像を渡す
-        img.title = formatDocxImageSize(img.clientWidth, img.clientHeight);
-        img.src = this.renderForExport(img, dpi).dataUrl;
-      });
-      const htmlStr = new XMLSerializer().serializeToString(document.getElementById('imageList'));
-      styles.markdown.heading1.paragraph = {
-        keepNext: false,
-        spacing: {
-          before: 0,
-          after: 0
+      const wordImages = images.map((img) => {
+        const exportImage = this.renderForExport(img, dpi);
+        return {
+          dataUrl: exportImage.dataUrl,
+          extension: exportImage.extension,
+          width: img.clientWidth,
+          height: img.clientHeight,
+          caption: img.dataset.fileName,
         }
-      }
-      const markdown = this.convertHtmlToMarkdown(htmlStr);
-      const docx = await markdownDocx(markdown);
+      });
+      const docx = createWordDocument(this.headerText.value, wordImages);
       const blob = await Packer.toBlob(docx);
       let filename = prompt("ファイル名を入力してください", "photobook.docx");
       if (filename === null) {
@@ -272,12 +246,6 @@ export default class PhotoBookApp {
       console.error('Word export failed:', error);
       alert('Wordファイルの作成に失敗しました。');
     } finally {
-      images.forEach((img) => {
-        const originalSrc = this.tempStack.shift();
-        if (originalSrc) img.src = originalSrc;
-        img.removeAttribute('title');
-      });
-      this.tempStack.clear();
       this.finishLoading();
     }
   }
@@ -613,28 +581,6 @@ export default class PhotoBookApp {
       !this.openHelpBtn.contains(event.target) &&
       this.helpSidebar.classList.contains('active')) {
       this.helpSidebar.classList.remove('active')
-    }
-  }
-
-  convertHtmlToMarkdown(htmlString) {
-    try {
-      // Initialize Turndown with custom options
-      const turndownService = new TurndownService({
-        headingStyle: 'setext',
-        codeBlockStyle: 'fenced',
-        emDelimiter: '_',
-        hr: '---',
-        bulletListMarker: '-',
-        strongDelimiter: '**',
-      });
-      // Remove scripts, styles, and other unwanted elements
-      turndownService.remove(['script', 'style', 'noscript', 'iframe']);
-      // Convert the HTML to Markdown
-      const markdown = turndownService.turndown(htmlString);
-      return markdown;
-    } catch (error) {
-      console.error('Error converting HTML to Markdown:', error);
-      return '';
     }
   }
 
