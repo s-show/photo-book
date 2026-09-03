@@ -1,6 +1,6 @@
 import './style.scss'
 import * as ExcelJS from 'exceljs';
-import { pxToMm, ptToMm, pxToPt, getImageHeightPt, mmToPt } from './utils.js';
+import { pxToMm, ptToMm, pxToPt, getImageHeightPt, mmToPt, getExportPixelWidth, getDataUrlExtension, formatDocxImageSize } from './utils.js';
 import TurndownService from 'turndown'
 import markdownDocx, { Packer, styles } from 'markdown-docx';
 
@@ -43,6 +43,7 @@ export default class PhotoBookApp {
     this.headerText = document.getElementById("headerTextInput");
     this.header = document.getElementById("header");
     this.imageWidthInput = document.getElementById("imageWidthInput");
+    this.imageQualitySelect = document.getElementById("imageQualitySelect");
     this.content = document.getElementById("content");
     this.loadingOverlay = document.getElementById("loadingOverlay");
     this.openHelpBtn = document.getElementById('helpIcon');
@@ -75,7 +76,6 @@ export default class PhotoBookApp {
     document.addEventListener('click', (e) => this.clickPage(e));
     window.addEventListener("load", () => this.finishLoading())
     window.addEventListener("beforeprint", () => this.handleBeforePrint());
-    window.addEventListener("afterprint", () => this.handleAfterPrint());
   }
 
   async handleFileSelection(event) {
@@ -233,15 +233,20 @@ export default class PhotoBookApp {
     // ローディング画面を表示させるために少し待機
     await new Promise(resolve => setTimeout(resolve, 100));
 
+    // 復元処理を finally で行うため try の外で宣言している
+    const images = Array.from(this.imageList.querySelectorAll(".thumb"));
     try {
       if (this.columnToggleBtn.checked) {
         window.alert('Word形式で出力する際、段組みは反映されません。');
       }
       this.header.innerText = this.headerText.value;
-      const images = Array.from(this.imageList.querySelectorAll(".thumb"));
+      const dpi = Number(this.imageQualitySelect.value);
       images.forEach((img) => {
         this.tempStack.push(img.src);
-        img.src = this.resizeImage(img, 1.0);
+        // markdown-docx は `![alt](src "幅x高さ")` の title で docx 上のサイズを決めるため、
+        // title に表示サイズを、src に高解像度の画像を渡す
+        img.title = formatDocxImageSize(img.clientWidth, img.clientHeight);
+        img.src = this.renderForExport(img, dpi).dataUrl;
       });
       const htmlStr = new XMLSerializer().serializeToString(document.getElementById('imageList'));
       styles.markdown.heading1.paragraph = {
@@ -263,13 +268,16 @@ export default class PhotoBookApp {
         filename = 'photobook.docx';
       }
       this.createDownloadLink(blob, filename);
-      images.forEach((img) => {
-        img.src = this.tempStack.shift();
-      });
     } catch (error) {
       console.error('Word export failed:', error);
       alert('Wordファイルの作成に失敗しました。');
     } finally {
+      images.forEach((img) => {
+        const originalSrc = this.tempStack.shift();
+        if (originalSrc) img.src = originalSrc;
+        img.removeAttribute('title');
+      });
+      this.tempStack.clear();
       this.finishLoading();
     }
   }
@@ -316,7 +324,6 @@ export default class PhotoBookApp {
         fitToWidth: 1,
         fitToHeight: 0, // 0を指定すると「自動」になる
         // タイトル行の設定は1列表示と2列表示で変える必要があるのでここでは設定しない
-        // printTitlesRow: '1:1', 
       };
       worksheet.getCell(rowIndex, colIndex).value = title;
       worksheet.getCell(rowIndex, colIndex).font = {
@@ -328,6 +335,7 @@ export default class PhotoBookApp {
       worksheet.headerFooter.oddFooter = "&P / &N ページ";
       worksheet.headerFooter.evenFooter = "&P / &N ページ";
 
+      const dpi = Number(this.imageQualitySelect.value);
       const images = Array.from(this.imageList.querySelectorAll(".thumb"));
       const filterdImages = [];
       const removedImages = [];
@@ -345,9 +353,11 @@ export default class PhotoBookApp {
         const imgFileName = img.dataset.fileName;
         const nextImgHeight = index < array.length - 1 ? array[index + 1].clientHeight : 0;
 
+        // 紙面上の大きさは下の `ext` が決めるので、画像データは高解像度でよい
+        const exportImage = this.renderForExport(img, dpi);
         const imageId = workbook.addImage({
-          base64: this.resizeImage(img, 1.0),
-          extension: 'png',
+          base64: exportImage.dataUrl,
+          extension: exportImage.extension,
         })
 
         if (this.columnToggleBtn.checked) {
@@ -440,7 +450,6 @@ export default class PhotoBookApp {
           }
         } else {
           // 1列表示の場合の処理
-          // worksheet.pageSetup.printTitlesRow = '1:1';
           worksheet.pageSetup.printTitlesRow = '1:2';
           worksheet.addImage(imageId, {
             tl: {
@@ -531,26 +540,43 @@ export default class PhotoBookApp {
   }
 
   handleBeforePrint() {
+    // 紙面上の大きさは CSS の `img.style.width` が決めており、画像を縮小すると
+    // プリンタの解像度を活かせず粗くなるだけなので、元画像のまま印刷する。
     this.header.innerText = this.headerText.value;
-    this.imageList.querySelectorAll(".thumb").forEach((img) => {
-      this.tempStack.push(img.src);
-      img.src = this.resizeImage(img, 1.0);
-    });
     document.documentElement.style.setProperty('--headerText', `"${this.headerText.value}"`)
   }
 
-  handleAfterPrint() {
-    this.imageList.querySelectorAll(".thumb").forEach((img) => {
-      img.src = this.tempStack.shift();
-    });
-  }
-
-  resizeImage(image, ratio) {
+  /**
+   * 出力用の画像データを作る。
+   * 紙面上のサイズは Word なら markdown の title、Excel なら `ext` が決めるので、
+   * ここでは「指定 DPI で印刷するのに必要な実ピクセル数」だけを決めればよい。
+   * @param {HTMLImageElement} image
+   * @param {number} dpi - 目標の印刷解像度
+   * @returns {{dataUrl: string, extension: string}}
+   */
+  renderForExport(image, dpi) {
+    const targetWidth = getExportPixelWidth(image.clientWidth, image.naturalWidth, dpi);
+    const extension = getDataUrlExtension(image.src);
+    // 元画像より高い解像度は作れないので、再エンコードせずそのまま使う。
+    // ただし Excel が確実に扱える形式に限り、それ以外は canvas を通して正規化する。
+    if (targetWidth >= image.naturalWidth && (extension === 'jpg' || extension === 'png')) {
+      return { dataUrl: image.src, extension };
+    }
     const canvas = document.createElement("canvas");
-    canvas.width = image.clientWidth * ratio;
-    canvas.height = image.clientHeight * ratio;
-    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/png");
+    canvas.width = targetWidth;
+    // clientHeight は整数に丸められているので、元画像の比率から高さを求める
+    canvas.height = Math.round(image.naturalHeight * targetWidth / image.naturalWidth);
+    const context = canvas.getContext("2d");
+    // 既定の補間は品質が低く、縮小率が大きいとモアレが出るため明示的に指定する
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = 'high';
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    // 写真を PNG で持つとファイルが肥大するので、元の形式に寄せる
+    const isPng = extension === 'png';
+    return {
+      dataUrl: canvas.toDataURL(isPng ? "image/png" : "image/jpeg", 0.92),
+      extension: isPng ? 'png' : 'jpg',
+    };
   }
 
   changeColumnNuber(event) {
