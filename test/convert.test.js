@@ -1,4 +1,4 @@
-import { getImageHeightPt, pxToMm, ptToMm, mmToPx, mmToPt } from "../src/utils";
+import { getImageHeightPt, pxToMm, ptToMm, mmToPx, mmToPt, getExportPixelWidth, getDataUrlExtension, formatDocxImageSize } from "../src/utils";
 
 test('convert px to mm', () => {
   expect(pxToMm(100)).toBe(27)
@@ -41,4 +41,44 @@ test('convert image pixel to row count', () => {
   expect(getImageHeightPt(153)).toBe(130)
   expect(getImageHeightPt(654.32)).toBe(530)
   expect(getImageHeightPt('hoge')).toBeNaN(530)
+});
+
+test('convert display width to export pixel width', () => {
+  // 表示幅360px = 3.75inch なので、300dpi なら 1125px 必要
+  expect(getExportPixelWidth(360, 4000, 300)).toBe(1125)
+  expect(getExportPixelWidth(360, 4000, 150)).toBe(563)
+  expect(getExportPixelWidth(360, 4000, 600)).toBe(2250)
+  expect(getExportPixelWidth(480, 4000, 300)).toBe(1500)
+  // 96dpi は従来の挙動（表示サイズと同じピクセル数）と一致する
+  expect(getExportPixelWidth(360, 4000, 96)).toBe(360)
+  // 元画像より大きくはしない
+  expect(getExportPixelWidth(360, 800, 300)).toBe(800)
+  expect(getExportPixelWidth(360, 200, 300)).toBe(200)
+  expect(getExportPixelWidth('hoge', 4000, 300)).toBeNaN()
+});
+
+test('get file extension from DataURL', () => {
+  expect(getDataUrlExtension('data:image/jpeg;base64,AAAA')).toBe('jpg')
+  expect(getDataUrlExtension('data:image/png;base64,AAAA')).toBe('png')
+  expect(getDataUrlExtension('data:image/webp;base64,AAAA')).toBe('webp')
+  expect(getDataUrlExtension('data:image/svg+xml;base64,AAAA')).toBe('svg+xml')
+  // 判別できない場合は png にフォールバックする
+  expect(getDataUrlExtension('https://example.com/a.jpg')).toBe('png')
+  expect(getDataUrlExtension('')).toBe('png')
+  expect(getDataUrlExtension(undefined)).toBe('png')
+});
+
+test('format image size for markdown-docx title', () => {
+  expect(formatDocxImageSize(360, 270)).toBe('360x270')
+  expect(formatDocxImageSize(360, 270.4)).toBe('360x270')
+  expect(formatDocxImageSize(360.6, 270.5)).toBe('361x271')
+});
+
+test('docx image size matches the pattern markdown-docx parses', () => {
+  // markdown-docx の parseImageTitleSize と同じ正規表現。
+  // 一致しないと title が無視され、画像が実ピクセル数の実寸で配置されて紙面が崩れる。
+  const markdownDocxPattern = /^(\d+%?)x(\d+%?)$/;
+  expect(formatDocxImageSize(360, 270)).toMatch(markdownDocxPattern)
+  expect(formatDocxImageSize(360.6, 270.5)).toMatch(markdownDocxPattern)
+  expect(formatDocxImageSize(1, 1)).toMatch(markdownDocxPattern)
 });

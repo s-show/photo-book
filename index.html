@@ -102,6 +102,14 @@
           <input type="number" id="imageWidthInput" min="100" step="10" value="360">
         </div>
         <div class="inputDiv">
+          <label id="imageQualityLabel" for="imageQualitySelect">出力画質</label>
+          <select id="imageQualitySelect">
+            <option value="150">標準（150dpi）</option>
+            <option value="300" selected>高品質（300dpi）</option>
+            <option value="600">最高（600dpi）</option>
+          </select>
+        </div>
+        <div class="inputDiv">
           <div class="toggle-switch-container">
             <span>1列表示</span>
             <input type="checkbox" id="columnToggleBtn" class="hidden-checkbox">
@@ -127,6 +135,7 @@
           <li>画像のサイズは、印刷プレビューで確認して適宜調整してください。</li>
           <li>印刷やWord/Excelファイルで保存する場合、ボタンやこのヘルプなどは出力されません。</li>
           <li>画像サイズは、360だとA4用紙に2～3枚、480だと2枚ぐらいになります。</li>
+          <li>「出力画質」はWord/Excelに埋め込む画像の細かさです。紙面上の大きさは変わりませんが、上げるとファイルサイズが大きくなります。印刷は常に元画像の画質で出力されます。</li>
         </ul>
         <button id="closeSidebar">閉じる</button>
       </div>
