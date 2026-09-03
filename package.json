@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "jszip": "^3.10.1",
     "sass": "^1.101.0",
     "vite": "^8.0.16",
     "vite-plugin-singlefile": "^2.3.3",
@@ -18,8 +19,6 @@
   "dependencies": {
     "docx": "^9.7.1",
     "exceljs": "^4.4.0",
-    "markdown-docx": "^1.6.0",
-    "sass-embedded": "^1.100.0",
-    "turndown": "^7.2.4"
+    "sass-embedded": "^1.100.0"
   }
 }

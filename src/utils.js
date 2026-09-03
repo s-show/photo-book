@@ -86,15 +86,3 @@ export function getDataUrlExtension(dataUrl) {
   const type = match[1].toLowerCase();
   return type === 'jpeg' ? 'jpg' : type;
 }
-
-/**
- * markdown-docx が docx 上の画像サイズとして解釈する title 文字列を組み立てる。
- * markdown-docx 側の正規表現 `/^(\d+%?)x(\d+%?)$/` に一致させる必要があるため、
- * 必ず整数に丸める。
- * @param {number} width - 表示幅（CSSピクセル）
- * @param {number} height - 表示高さ（CSSピクセル）
- * @returns {string} 例: '360x270'
- */
-export function formatDocxImageSize(width, height) {
-  return `${Math.round(width)}x${Math.round(height)}`;
-}

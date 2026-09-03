@@ -1,4 +1,4 @@
-import { getImageHeightPt, pxToMm, ptToMm, mmToPx, mmToPt, getExportPixelWidth, getDataUrlExtension, formatDocxImageSize } from "../src/utils";
+import { getImageHeightPt, pxToMm, ptToMm, mmToPx, mmToPt, getExportPixelWidth, getDataUrlExtension } from "../src/utils";
 
 test('convert px to mm', () => {
   expect(pxToMm(100)).toBe(27)
@@ -66,19 +66,4 @@ test('get file extension from DataURL', () => {
   expect(getDataUrlExtension('https://example.com/a.jpg')).toBe('png')
   expect(getDataUrlExtension('')).toBe('png')
   expect(getDataUrlExtension(undefined)).toBe('png')
-});
-
-test('format image size for markdown-docx title', () => {
-  expect(formatDocxImageSize(360, 270)).toBe('360x270')
-  expect(formatDocxImageSize(360, 270.4)).toBe('360x270')
-  expect(formatDocxImageSize(360.6, 270.5)).toBe('361x271')
-});
-
-test('docx image size matches the pattern markdown-docx parses', () => {
-  // markdown-docx の parseImageTitleSize と同じ正規表現。
-  // 一致しないと title が無視され、画像が実ピクセル数の実寸で配置されて紙面が崩れる。
-  const markdownDocxPattern = /^(\d+%?)x(\d+%?)$/;
-  expect(formatDocxImageSize(360, 270)).toMatch(markdownDocxPattern)
-  expect(formatDocxImageSize(360.6, 270.5)).toMatch(markdownDocxPattern)
-  expect(formatDocxImageSize(1, 1)).toMatch(markdownDocxPattern)
 });
