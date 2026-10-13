@@ -14,7 +14,7 @@
       {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            nodejs_20
+            nodejs_24
             nodePackages.pnpm
             emmet-ls
             typescript-language-server
