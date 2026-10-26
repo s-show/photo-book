@@ -11,14 +11,14 @@
   },
   "devDependencies": {
     "jszip": "^3.10.2",
-    "sass": "^1.105.1",
-    "vite": "^8.3.4",
-    "vite-plugin-singlefile": "^2.3.3",
+    "sass": "^1.106.1",
+    "vite": "^8.3.5",
+    "vite-plugin-singlefile": "^2.3.4",
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "docx": "^9.11.0",
+    "docx": "^9.13.0",
     "exceljs": "^4.4.0",
-    "sass-embedded": "^1.105.1"
+    "sass-embedded": "^1.106.1"
   }
 }
